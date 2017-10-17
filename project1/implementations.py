@@ -25,7 +25,6 @@ def least_squares(y, tx):
 def ridge_regression(y, tx, lambda_):
     x_t = np.transpose(tx)
     term = np.dot(x_t, tx)
-    print(term.shape)
     identity = np.identity(len(term))
     lambda_i = np.dot(lambda_,identity)
     res = np.linalg.solve(term+lambda_i, x_t)
@@ -48,7 +47,7 @@ def split_data(x, y, ratio, seed=1):
 def compute_gradient(y, tx, w):
     e = y - np.dot(tx, w)
     gradient = -(1/len(y)) * np.dot(tx.T, e)
-    loss = compute_loss(y, tx, w)
+    loss = compute_mse(y, tx, w)
     return gradient, loss
 
 def gradient_descent(y, tx, initial_w, max_iters, gamma):
@@ -79,3 +78,19 @@ def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
         ws.append(initial_w)
     return losses, ws
 
+def standardize(x):
+    """Standardize the original data set."""
+    mean_x = np.mean(x)
+    x = x - mean_x
+    std_x = np.std(x)
+    x = x / std_x
+    return x, mean_x, std_x
+
+
+def build_model_data(height, weight):
+    """Form (y,tX) to get regression data in matrix form."""
+    y = weight
+    x = height
+    num_samples = len(y)
+    tx = np.c_[np.ones(num_samples), x]
+    return y, tx
