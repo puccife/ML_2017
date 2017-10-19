@@ -6,6 +6,44 @@ def build_poly(x, degree):
         px = np.c_[px, pow(x, n+1)]
     return px
 
+def calculate_loss(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    t = np.dot(tx,w)
+    loss = sum(np.log(1+np.exp(t)) - (y*t))
+    return loss
+
+def learning_by_gradient_descent(y, tx, w, gamma):
+    """
+        Do one step of gradient descen using logistic regression.
+        Return the loss and the updated w.
+        """
+    loss = calculate_loss(y,tx,w)
+    gradient = calculate_gradient(y,tx,w)
+    termine = np.dot(gamma,gradient)
+    w = w - termine
+    return loss, w
+
+def calculate_hessian(y, tx, w):
+    """return the hessian of the loss function."""
+    S_nn = []
+    sigmoid_value = sigmoid(np.dot(tx,w))
+    S_nn = sigmoid_value*(1-sigmoid_value)
+    S_diag = np.diag(S_nn.flatten())
+    tx_transpose = tx.T
+    
+    temp = np.dot(tx_transpose,S_diag)
+    hessian = np.dot(temp,tx)
+    
+    return hessian
+
+def logistic_regression(y, tx, w):
+    """return the loss, gradient, and hessian."""
+    loss = calculate_loss(y,tx,w)
+    gradient = calculate_gradient(y,tx,w)
+    hessian = calculate_hessian(y,tx,w)
+    
+    return loss, gradient, hessian
+
 def compute_mse(y, tx, w):
     e = y - tx.dot(w)
     mse = e.dot(e) / (2 * len(e))
@@ -49,6 +87,19 @@ def compute_gradient(y, tx, w):
     gradient = -(1/len(y)) * np.dot(tx.T, e)
     loss = compute_mse(y, tx, w)
     return gradient, loss
+
+def sigmoid(t):
+    """apply sigmoid function on t."""
+    exponential_value = np.exp(t)
+    sigmoid_value = (exponential_value) / ( 1 + exponential_value)
+    return sigmoid_value
+
+def calculate_gradient(y, tx, w):
+    """compute the gradient of loss."""
+    sigmoid_value = sigmoid(np.dot(tx,w))
+    tx_transpose = tx.T
+    gradient = np.dot(tx_transpose,(sigmoid_value-y))
+    return gradient
 
 def gradient_descent(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
