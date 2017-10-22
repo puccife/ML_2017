@@ -1,4 +1,5 @@
 import numpy as np
+from plots import cross_validation_visualization
 
 def build_poly(x, degree):
     px = np.ones(len(x))
@@ -9,7 +10,11 @@ def build_poly(x, degree):
 def calculate_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
     t = np.dot(tx,w)
-    loss = sum(np.log(1+np.exp(t)) - (y*t))
+    t = t.flatten()
+    term1 = np.log(1+np.exp(t))
+    term2 = (np.multiply(y,t))
+    erro = term1 - term2
+    loss = sum(erro)
     return loss
 
 def learning_by_gradient_descent(y, tx, w, gamma):
@@ -27,11 +32,18 @@ def calculate_hessian(y, tx, w):
     """return the hessian of the loss function."""
     S_nn = []
     sigmoid_value = sigmoid(np.dot(tx,w))
+    sigmoid_value = sigmoid_value.flatten()
+    print('cussomak')
     S_nn = sigmoid_value*(1-sigmoid_value)
+    print('cussomak')
     S_diag = np.diag(S_nn.flatten())
+    print('cussomak')
     tx_transpose = tx.T
-    
+    print('cussomak')
+    print(tx_transpose)
+    print(S_diag)
     temp = np.dot(tx_transpose,S_diag)
+    print('cussomak')
     hessian = np.dot(temp,tx)
     
     return hessian
@@ -40,8 +52,9 @@ def logistic_regression(y, tx, w):
     """return the loss, gradient, and hessian."""
     loss = calculate_loss(y,tx,w)
     gradient = calculate_gradient(y,tx,w)
+    print('hessian')
     hessian = calculate_hessian(y,tx,w)
-    
+    print('cussomak')
     return loss, gradient, hessian
 
 def compute_mse(y, tx, w):
@@ -98,6 +111,7 @@ def calculate_gradient(y, tx, w):
     """compute the gradient of loss."""
     sigmoid_value = sigmoid(np.dot(tx,w))
     tx_transpose = tx.T
+    sigmoid_value = sigmoid_value.flatten()
     gradient = np.dot(tx_transpose,(sigmoid_value-y))
     return gradient
 
@@ -145,3 +159,37 @@ def build_model_data(height, weight):
     num_samples = len(y)
     tx = np.c_[np.ones(num_samples), x]
     return y, tx
+
+def build_k_indices(y, k_fold, seed):
+    """build k indices for k-fold."""
+    num_row = y.shape[0]
+    interval = int(num_row / k_fold)
+    np.random.seed(seed)
+    indices = np.random.permutation(num_row)
+    k_indices = [indices[k * interval: (k + 1) * interval]
+                 for k in range(k_fold)]
+    return np.array(k_indices)
+
+def cross_validation(y, x, k_indices, k, lambda_, degree):
+    """return the loss of ridge regression."""
+    
+    test_idx = k_indices[k]
+    train_idx = k_indices[np.arange(len(k_indices))!=k]
+    train_idx = train_idx.flatten()
+    test_idx = test_idx.flatten()
+    
+    train_x = np.array([x[i] for i in train_idx])
+    train_y = np.array([y[i] for i in train_idx])
+    test_x = np.array([x[i] for i in test_idx])
+    test_y = np.array([y[i] for i in test_idx])
+    
+    train_px = build_poly(x=train_x, degree=degree)
+    test_px = build_poly(x=test_x, degree=degree)
+
+    ws = ridge_regression(y=train_y, lambda_=lambda_, tx=train_px)
+    
+    ridge_term = (np.linalg.norm(ws,ord=2))**2
+    
+    loss_tr = compute_mse(tx=train_px, w=ws, y=train_y)  + ridge_term * lambda_
+    loss_te = compute_mse(tx=test_px, w=ws, y=test_y)  + ridge_term * lambda_
+    return loss_tr, loss_te, ws
