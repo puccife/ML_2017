@@ -1,5 +1,8 @@
 import numpy as np
 from plots import cross_validation_visualization
+import os
+
+clear = lambda: os.system('cls')
 
 def build_poly(x, degree):
     px = np.ones(len(x))
@@ -10,51 +13,80 @@ def build_poly(x, degree):
 def calculate_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
     t = np.dot(tx,w)
-    t = t.flatten()
-    term1 = np.log(1+np.exp(t))
+    term1 = np.log(1+np.exp(t, dtype='float128'))
     term2 = (np.multiply(y,t))
     erro = term1 - term2
     loss = sum(erro)
     return loss
 
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+    """
+    Generate a minibatch iterator for a dataset.
+    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
+    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
+    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
+    Example of use :
+    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
+        <DO-SOMETHING>
+    """
+    data_size = len(y)
+    if shuffle:
+        shuffle_indices = np.random.permutation(np.arange(data_size))
+        shuffled_y = y[shuffle_indices]
+        shuffled_tx = tx[shuffle_indices]
+    else:
+        shuffled_y = y
+        shuffled_tx = tx
+    for batch_num in range(num_batches):
+        start_index = batch_num * batch_size
+        end_index = min((batch_num + 1) * batch_size, data_size)
+        if start_index != end_index:
+            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+            
 def learning_by_gradient_descent(y, tx, w, gamma):
     """
         Do one step of gradient descen using logistic regression.
         Return the loss and the updated w.
         """
     loss = calculate_loss(y,tx,w)
+    # w = calculate_logistic_SGD(y, tx, w, gamma)
     gradient = calculate_gradient(y,tx,w)
     termine = np.dot(gamma,gradient)
     w = w - termine
     return loss, w
 
-def calculate_hessian(y, tx, w):
-    """return the hessian of the loss function."""
-    S_nn = []
-    sigmoid_value = sigmoid(np.dot(tx,w))
-    sigmoid_value = sigmoid_value.flatten()
-    print('cussomak')
-    S_nn = sigmoid_value*(1-sigmoid_value)
-    print('cussomak')
-    S_diag = np.diag(S_nn.flatten())
-    print('cussomak')
-    tx_transpose = tx.T
-    print('cussomak')
-    print(tx_transpose)
-    print(S_diag)
-    temp = np.dot(tx_transpose,S_diag)
-    print('cussomak')
-    hessian = np.dot(temp,tx)
+def calculate_logistic_SGD(y, tx, w, gamma):
+    batch_size = 100
+    max_iters = 2500
+    for b_y, b_x in batch_iter(y, tx, batch_size, max_iters):
+        gradient = calculate_gradient(b_y, b_x, w)
+        termine = np.dot(gamma, gradient)
+        w = w - termine
+    return w
     
-    return hessian
+def calculate_gradient(y, tx, w):
+    """compute the gradient of loss."""
+    t = np.dot(tx,w)
+    sigmoid_value = sigmoid(t)
+    tx_transpose = tx.T
+    res = sigmoid_value-y
+    gradient = np.dot(tx_transpose,(sigmoid_value-y))
+    return gradient  
+   
+def sigmoid(t):
+    """apply sigmoid function on t."""
+    exponential_value = np.exp((-t), dtype='float128')
+    sigmoid_value = 1 / (1 + exponential_value)
+#    sigmoid_value = (exponential_value) / ( 1 + exponential_value)
+    return sigmoid_value
+
 
 def logistic_regression(y, tx, w):
     """return the loss, gradient, and hessian."""
     loss = calculate_loss(y,tx,w)
     gradient = calculate_gradient(y,tx,w)
-    print('hessian')
+    print('before hessian')
     hessian = calculate_hessian(y,tx,w)
-    print('cussomak')
     return loss, gradient, hessian
 
 def compute_mse(y, tx, w):
@@ -101,20 +133,6 @@ def compute_gradient(y, tx, w):
     loss = compute_mse(y, tx, w)
     return gradient, loss
 
-def sigmoid(t):
-    """apply sigmoid function on t."""
-    exponential_value = np.exp(t)
-    sigmoid_value = (exponential_value) / ( 1 + exponential_value)
-    return sigmoid_value
-
-def calculate_gradient(y, tx, w):
-    """compute the gradient of loss."""
-    sigmoid_value = sigmoid(np.dot(tx,w))
-    tx_transpose = tx.T
-    sigmoid_value = sigmoid_value.flatten()
-    gradient = np.dot(tx_transpose,(sigmoid_value-y))
-    return gradient
-
 def gradient_descent(y, tx, initial_w, max_iters, gamma):
     ws = [initial_w]
     losses = []
@@ -143,15 +161,25 @@ def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
         ws.append(initial_w)
     return losses, ws
 
-def standardize(x):
+def standardize2(x):
     """Standardize the original data set."""
-    mean_x = np.nanmean(x, axis=0)
-    x = x - mean_x
-    std_x = np.std(x, axis=0)
-    x = x / std_x
-    return x, mean_x, std_x
+    tx = np.ma.array(x, mask=np.isnan(x))
+    me = tx.mean(axis=0)
+    mean_x = np.ma.getdata(me)
+    tx = tx - mean_x
+    std_x = np.std(tx, axis=0)
+    std_x = np.ma.getdata(std_x)
+    tx = tx / std_x
+    return tx, mean_x, std_x
 
-
+def standardize(x):
+    mean_x = x.mean(axis=0)
+    std_x = x.std(axis=0)
+    normed = (x - mean_x) / std_x
+    print(normed.mean(axis=0))
+    print(normed.std(axis=0))
+    return normed, mean_x, std_x
+    
 def build_model_data(height, weight):
     """Form (y,tX) to get regression data in matrix form."""
     y = weight
@@ -169,6 +197,20 @@ def build_k_indices(y, k_fold, seed):
     k_indices = [indices[k * interval: (k + 1) * interval]
                  for k in range(k_fold)]
     return np.array(k_indices)
+
+def calculate_hessian(y, tx, w):
+    """return the hessian of the loss function."""
+    S_nn = []
+    sigmoid_value = sigmoid(np.dot(tx,w))
+    S_nn = sigmoid_value*(1-sigmoid_value)
+    S_diag = np.diag(S_nn.flatten())
+    tx_transpose = tx.T
+    print('before temp')
+    temp = np.dot(tx_transpose,S_diag)
+    print('after temp')
+    hessian = np.dot(temp,tx)
+    print('after hessian')
+    return hessian
 
 def cross_validation(y, x, k_indices, k, lambda_, degree):
     """return the loss of ridge regression."""

@@ -4,7 +4,6 @@ import numpy as np
 from implementations import *
 import matplotlib.pyplot as plt
 
-
 def plot_fitted_curve(y, x, weights, degree, ax):
     """plot the fitted curve."""
     ax.scatter(x, y, color='b', s=12, facecolors='none', edgecolors='r')
@@ -44,3 +43,5 @@ def cross_validation_visualization(lambds, mse_tr, mse_te):
     plt.legend(loc=2)
     plt.grid(True)
     plt.savefig("cross_validation")
+    
+    from helpers import de_standardize, standardize
