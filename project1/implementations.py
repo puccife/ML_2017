@@ -172,13 +172,14 @@ def standardize2(x):
     tx = tx / std_x
     return tx, mean_x, std_x
 
-def standardize(x):
-    mean_x = x.mean(axis=0)
-    std_x = x.std(axis=0)
-    normed = (x - mean_x) / std_x
-    print(normed.mean(axis=0))
-    print(normed.std(axis=0))
-    return normed, mean_x, std_x
+def standardize(x, testx):
+    mean_x = np.mean(x, axis=0)
+    x = x - mean_x
+    testx = testx - mean_x
+    std_x = np.std(x, axis=0)
+    x[:, std_x > 0] = x[:, std_x > 0] / std_x[std_x > 0]
+    testx[:, std_x > 0] = testx[:, std_x > 0] / std_x[std_x > 0]
+    return x, testx
     
 def build_model_data(height, weight):
     """Form (y,tX) to get regression data in matrix form."""
