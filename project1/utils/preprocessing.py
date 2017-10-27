@@ -66,14 +66,12 @@ def adjust_features(x, testx):
     pz_tau = x[:, pri_tau_pt] * np.sinh(x[:, pri_tau_eta])
     mod_tau = x[:, pri_tau_pt] * np.cosh(x[:, pri_tau_eta])
     # magnitude_tau = np.sqrt(np.square(px_tau) + np.square(py_tau) + np.square(pz_tau))
-    # magnitude_tau_square = (np.square(px_tau) + np.square(py_tau) + np.square(pz_tau))
     # TRAIN - LEPT
     px_lep = x[:, pri_lep_pt] * np.sin(x[:, pri_lep_phi])
     py_lep = x[:, pri_lep_pt] * np.cos(x[:, pri_lep_phi])
     pz_lep = x[:, pri_lep_pt] * np.sinh(x[:, pri_lep_eta])
     mod_lep = x[:, pri_lep_pt] * np.cosh(x[:, pri_lep_eta])
     # magnitude_lep = np.sqrt(np.square(px_lep) + np.square(py_lep) + np.square(pz_lep))
-    # magnitude_lep_square = (np.square(px_lep) + np.square(py_lep) + np.square(pz_lep))
     # TEST - TAU
     tsquare_mass = np.sqrt(testx[:, DER_mass_MMC])
     tsquare_mass_t = np.sqrt(testx[:, DER_mass_transverse_met_lep])
@@ -82,14 +80,12 @@ def adjust_features(x, testx):
     pz_taut = testx[:, pri_tau_pt] * np.sinh(testx[:, pri_tau_eta])
     mod_taut = testx[:, pri_tau_pt] * np.cosh(testx[:, pri_tau_eta])
     # magnitude_taut = np.sqrt(np.square(px_taut) + np.square(py_taut) + np.square(pz_taut))
-    # magnitude_taut_square = (np.square(px_taut) + np.square(py_taut) + np.square(pz_taut))
     # TEST - LEPT
     px_lept = testx[:, pri_lep_pt] * np.sin(testx[:, pri_lep_phi])
     py_lept = testx[:, pri_lep_pt] * np.cos(testx[:, pri_lep_phi])
     pz_lept = testx[:, pri_lep_pt] * np.sinh(testx[:, pri_lep_eta])
     mod_lept = testx[:, pri_lep_pt] * np.cosh(testx[:, pri_lep_eta])
     # magnitude_lept = np.sqrt(np.square(px_lept) + np.square(py_lept) + np.square(pz_lept))
-    # magnitude_lept_square = (np.square(px_lept) + np.square(py_lept) + np.square(pz_lept))
     train_features = [px_tau,py_tau,pz_tau,mod_tau,
                       px_lep,py_lep,pz_lep,mod_lep, square_mass, square_mass_t]
     test_features = [px_taut, py_taut,pz_taut,mod_taut,
@@ -138,10 +134,10 @@ def split_jets(train_x, train_y, test_x, test_y, idstest):
     idstest_2 = idstest[indices_x_2_test]
     idstest_3 = idstest[indices_x_3_test]
 
-    x_delete_index_0 = [0,1,4,5,6,12,15,18,20,23,24,25,26,27,28,29]
-    x_delete_index_1 = [0,1,4,5,6,12,15,18,20,25,26,27,28]
-    x_delete_index_2 = [0,1,15,18,20,25,28]
-    x_delete_index_3 = [0,1,15,18,20,25,28]
+    x_delete_index_0 = [4,5,6,12,23,24,25,26,27,28,29]
+    x_delete_index_1 = [4,5,6,12,26,27,28]
+    x_delete_index_2 = []
+    x_delete_index_3 = []
 
     x_jets_0_train = remove_features(x_jets_0_train, x_delete_index_0)
     x_jets_0_test = remove_features(x_jets_0_test, x_delete_index_0)
