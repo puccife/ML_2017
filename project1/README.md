@@ -24,6 +24,7 @@ You will find the testing and training data in the folder named `Data`.
 Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extract the csv files.
 A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
 ## Utilization
+Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
 
 
 ## And coding style tests
