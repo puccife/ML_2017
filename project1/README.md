@@ -56,10 +56,24 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
   * `nan_to_mean [ Replaces -999 values with the mean for all the features.]`
   * `adjust_features [ Adding extra meaningful features to our training/testing sets.]`
   * `split_jets [ splits the training/testing sets to their corresponding jet number.]`
+#### proj1_helpers
+  * `load_csv_data [ Loads our train/test csv files.] `
+  * `predict_labels [ Generates class predictions given weights, and a test data matrix.]`
+  * `create_csv_submission [ Creates output csv file to be uploaded to Kaggle.]`
+  * `sort_predictions [ Sorts the predictions using their ids`
+  * `cross_validation_visualization [ Visualization of curves.]`
+#### train_utils.py
+  * `split_data [ Splits the training data given a ratio.]`
+  * `build_poly [ Creates a polynomial using input features to a given degree.]`
+  * `batch_iter [ Generate a minibatch iterator for a dataset.]`
+  * `get_lambda [ Place your best lambdas from cross validation manually here.]`
+  * `get_degree [ Place the best degree for each jet here.]`
 ## And coding style tests
 
 ## Deployment
 
 ## Authors
-
+Federico Pucci - pucci.federico@epfl.ch
+Mazen Mahdi - fouad.mazen@epfl.ch
+Davor Todorovski -
 ## Acknowledgments
