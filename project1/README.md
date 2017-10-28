@@ -25,49 +25,49 @@ Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extra
 A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
 ## Utilization
 Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
-#### costfunction.py
-  * `Sigmoid`
+  * #### costfunction.py
+     * `Sigmoid`
 
-  * `Mean Square Error [ **MSE** ]`
+     * `Mean Square Error [ **MSE** ]`
 
-  * `Mean Absolute Error [ **MAE** ] `
+     * `Mean Absolute Error [ **MAE** ] `
 
-  * `Log likelihood`
+     * `Log likelihood`
 
-  * `Compute_loss which computes the loss using one of the methods mentioned above`
+     * `Compute_loss which computes the loss using one of the methods mentioned above`
 
-#### gradient.py
-  * `compute_gradient`
-#### implementations.py
-  * `least_squares [ Linear regression using normal equations ]`
-  * `least_squares_gd [ Linear regression using gradient descent ]`
-  * `least_squares_gd [ Linear regression using stochastic gradient descent ]`
-  * `ridge_regression [ Ridge regression using normal equations ] `
-  * `logistic_regression [ Logistic regression method ]`
-  * `reg_logistic_regression [ Regularized logistic regression ]`
-  * `stochastic_gradient_descent`
-  * `learning_by_gradient_descent`
-  * `build_k_indices [Building k indices for k-fold cross validation.]`
-  * `cross_validation`
-#### preprocessing.py
-  * `remove_features [ Removes features given column number.]`
-  * `standardize [ Standardizing the Training and Testing dataset with the same parameters.]`
-  * `nan_to_mean_jet [ Replaces -999 values with the mean of the feature for each jet.]`
-  * `nan_to_mean [ Replaces -999 values with the mean for all the features.]`
-  * `adjust_features [ Adding extra meaningful features to our training/testing sets.]`
-  * `split_jets [ splits the training/testing sets to their corresponding jet number.]`
-#### proj1_helpers
-  * `load_csv_data [ Loads our train/test csv files.] `
-  * `predict_labels [ Generates class predictions given weights, and a test data matrix.]`
-  * `create_csv_submission [ Creates output csv file to be uploaded to Kaggle.]`
-  * `sort_predictions [ Sorts the predictions using their ids`
-  * `cross_validation_visualization [ Visualization of curves.]`
-#### train_utils.py
-  * `split_data [ Splits the training data given a ratio.]`
-  * `build_poly [ Creates a polynomial using input features to a given degree.]`
-  * `batch_iter [ Generate a minibatch iterator for a dataset.]`
-  * `get_lambda [ Place your best lambdas from cross validation manually here.]`
-  * `get_degree [ Place the best degree for each jet here.]`
+  * #### gradient.py
+     * `compute_gradient`
+  * #### implementations.py
+     * `least_squares [ Linear regression using normal equations ]`
+     * `least_squares_gd [ Linear regression using gradient descent ]`
+     * `least_squares_gd [ Linear regression using stochastic gradient descent ]`
+     * `ridge_regression [ Ridge regression using normal equations ] `
+     * `logistic_regression [ Logistic regression method ]`
+     * `reg_logistic_regression [ Regularized logistic regression ]`
+     * `stochastic_gradient_descent`
+     * `learning_by_gradient_descent`
+     * `build_k_indices [Building k indices for k-fold cross validation.]`
+     * `cross_validation`
+  * #### preprocessing.py
+     * `remove_features [ Removes features given column number.]`
+     * `standardize [ Standardizing the Training and Testing dataset with the same parameters.]`
+     * `nan_to_mean_jet [ Replaces -999 values with the mean of the feature for each jet.]`
+     * `nan_to_mean [ Replaces -999 values with the mean for all the features.]`
+     * `adjust_features [ Adding extra meaningful features to our training/testing sets.]`
+     * `split_jets [ splits the training/testing sets to their corresponding jet number.]`
+  * #### proj1_helpers
+     * `load_csv_data [ Loads our train/test csv files.] `
+     * `predict_labels [ Generates class predictions given weights, and a test data matrix.]`
+     * `create_csv_submission [ Creates output csv file to be uploaded to Kaggle.]`
+     * `sort_predictions [ Sorts the predictions using their ids`
+     * `cross_validation_visualization [ Visualization of curves.]`
+  * #### train_utils.py
+     * `split_data [ Splits the training data given a ratio.]`
+     * `build_poly [ Creates a polynomial using input features to a given degree.]`
+     * `batch_iter [ Generate a minibatch iterator for a dataset.]`
+     * `get_lambda [ Place your best lambdas from cross validation manually here.]`
+     * `get_degree [ Place the best degree for each jet here.]`
 ## And coding style tests
 
 ## Deployment
