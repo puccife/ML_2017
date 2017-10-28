@@ -5,12 +5,9 @@ def split_data(x, y, ratio, seed=1):
     np.random.shuffle(x)
     np.random.seed(seed)
     np.random.shuffle(y)
-
     splitting_index = int(len(x) * ratio)
-
     train_x, test_x = x[0:splitting_index], x[splitting_index:len(x)]
     train_y, test_y = y[0:splitting_index], y[splitting_index:len(y)]
-
     return train_x, train_y, test_x, test_y
 
 def build_poly(x, degree):
@@ -43,3 +40,18 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         end_index = min((batch_num + 1) * batch_size, data_size)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+
+def get_lambda(i):
+    if i == 0:
+        return 3.03919538231e-07
+    elif i == 1:
+        return 2.39502661999e-08
+    elif i == 2:
+        return 1.61026202756e-07
+    elif i == 3:
+        return 1.26896100317e-08
+
+
+def get_degree(i):
+    deg = [1,4,4,4]
+    return deg[i]

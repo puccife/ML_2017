@@ -89,6 +89,7 @@ create_csv_submission(idstest_2, y_pred_2, 'jet_pred/prediction_2.csv')
 create_csv_submission(idstest_3, y_pred_3, 'jet_pred/prediction_3.csv')
 
 interesting_files = glob.glob("jet_pred/*.csv")
+
 with open('someoutputfile_1.csv', 'wb') as outfile:
     for i, fname in enumerate(interesting_files):
         with open(fname, 'rb') as infile:
@@ -97,6 +98,7 @@ with open('someoutputfile_1.csv', 'wb') as outfile:
             # Block copy rest of file from input to output without parsing
             shutil.copyfileobj(infile, outfile)
             print(fname + " has been imported.")
+
 data = csv.reader(open('someoutputfile_1.csv'),delimiter=',')
 sortedlist = sorted(data, key=operator.itemgetter(0))
 del sortedlist[len(sortedlist)-1]

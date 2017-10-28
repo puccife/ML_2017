@@ -46,6 +46,13 @@ def create_csv_submission(ids, y_pred, name):
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({'Id':int(r1),'Prediction':int(r2)})
 
+def sort_predictions(ids, preds):
+    predictions = []
+    for id, pred in zip(ids, preds):
+        for i, p in zip(id,pred):
+            predictions.append([i, p])
+    return zip(*sorted(predictions, key=lambda x: x[0]))
+
 def cross_validation_visualization(lambds, mse_tr, mse_te):
     """visualization the curves of mse_tr and mse_te."""
     plt.semilogx(lambds, mse_tr, marker=".", color='b', label='train error')

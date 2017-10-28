@@ -60,36 +60,40 @@ def nan_to_mean(x, testx):
 
 def adjust_features(x, testx):
     square_mass = np.sqrt(x[:, DER_mass_MMC])
-    square_mass_t = np.sqrt(x[:, DER_mass_transverse_met_lep])
+    # square_mass_t = np.sqrt(x[:, DER_mass_transverse_met_lep])
     px_tau = x[:, pri_tau_pt] * np.sin(x[:, pri_tau_phi])
     py_tau = x[:, pri_tau_pt] * np.cos(x[:, pri_tau_phi])
     pz_tau = x[:, pri_tau_pt] * np.sinh(x[:, pri_tau_eta])
     mod_tau = x[:, pri_tau_pt] * np.cosh(x[:, pri_tau_eta])
-    # magnitude_tau = np.sqrt(np.square(px_tau) + np.square(py_tau) + np.square(pz_tau))
     # TRAIN - LEPT
     px_lep = x[:, pri_lep_pt] * np.sin(x[:, pri_lep_phi])
     py_lep = x[:, pri_lep_pt] * np.cos(x[:, pri_lep_phi])
     pz_lep = x[:, pri_lep_pt] * np.sinh(x[:, pri_lep_eta])
     mod_lep = x[:, pri_lep_pt] * np.cosh(x[:, pri_lep_eta])
-    # magnitude_lep = np.sqrt(np.square(px_lep) + np.square(py_lep) + np.square(pz_lep))
     # TEST - TAU
     tsquare_mass = np.sqrt(testx[:, DER_mass_MMC])
-    tsquare_mass_t = np.sqrt(testx[:, DER_mass_transverse_met_lep])
+    # tsquare_mass_t = np.sqrt(testx[:, DER_mass_transverse_met_lep])
     px_taut = testx[:, pri_tau_pt] * np.sin(testx[:, pri_tau_phi])
     py_taut = testx[:, pri_tau_pt] * np.cos(testx[:, pri_tau_phi])
     pz_taut = testx[:, pri_tau_pt] * np.sinh(testx[:, pri_tau_eta])
     mod_taut = testx[:, pri_tau_pt] * np.cosh(testx[:, pri_tau_eta])
-    # magnitude_taut = np.sqrt(np.square(px_taut) + np.square(py_taut) + np.square(pz_taut))
     # TEST - LEPT
     px_lept = testx[:, pri_lep_pt] * np.sin(testx[:, pri_lep_phi])
     py_lept = testx[:, pri_lep_pt] * np.cos(testx[:, pri_lep_phi])
     pz_lept = testx[:, pri_lep_pt] * np.sinh(testx[:, pri_lep_eta])
     mod_lept = testx[:, pri_lep_pt] * np.cosh(testx[:, pri_lep_eta])
-    # magnitude_lept = np.sqrt(np.square(px_lept) + np.square(py_lept) + np.square(pz_lept))
-    train_features = [px_tau,py_tau,pz_tau,mod_tau,
-                      px_lep,py_lep,pz_lep,mod_lep, square_mass, square_mass_t]
-    test_features = [px_taut, py_taut,pz_taut,mod_taut,
-                      px_lept,py_lept,pz_lept,mod_lept, tsquare_mass, tsquare_mass_t]
+
+    inv_log_cols = [0, 2, 5, 7, 9, 10, 13, 16, 19, 21, 23, 26]
+    # Create inverse log values of features which are positive in value.
+    x_train_inv_log_cols = np.log(1 / (1 + x[:, inv_log_cols]))
+    x = np.hstack((x, x_train_inv_log_cols))
+    x_test_inv_log_cols = np.log(1 / (1 + testx[:, inv_log_cols]))
+    testx = np.hstack((testx, x_test_inv_log_cols))
+
+    train_features = [px_tau,py_tau,pz_tau,
+                      px_lep,py_lep,pz_lep, square_mass]
+    test_features = [px_taut, py_taut,pz_taut,
+                      px_lept,py_lept,pz_lept, tsquare_mass]
     for feat in train_features:
         x = np.column_stack((x, feat))
     for feat in test_features:
@@ -134,8 +138,8 @@ def split_jets(train_x, train_y, test_x, test_y, idstest):
     idstest_2 = idstest[indices_x_2_test]
     idstest_3 = idstest[indices_x_3_test]
 
-    x_delete_index_0 = [4,5,6,12,23,24,25,26,27,28,29]
-    x_delete_index_1 = [4,5,6,12,26,27,28]
+    x_delete_index_0 = []
+    x_delete_index_1 = []
     x_delete_index_2 = []
     x_delete_index_3 = []
 
@@ -148,8 +152,10 @@ def split_jets(train_x, train_y, test_x, test_y, idstest):
     x_jets_3_train = remove_features(x_jets_3_train, x_delete_index_3)
     x_jets_3_test = remove_features(x_jets_3_test, x_delete_index_3)
 
-    return x_jets_0_train, x_jets_1_train, x_jets_2_train, x_jets_3_train,\
-           x_jets_0_test, x_jets_1_test, x_jets_2_test, x_jets_3_test, \
-           y_jets_0_train, y_jets_1_train, y_jets_2_train, y_jets_3_train, \
-           y_jets_0_test, y_jets_1_test, y_jets_2_test, y_jets_3_test,\
-           idstest_0, idstest_1, idstest_2, idstest_3
+    ids = [idstest_0, idstest_1, idstest_2, idstest_3]
+    x_jets_train = [x_jets_0_train, x_jets_1_train, x_jets_2_train, x_jets_3_train]
+    x_jets_test = [x_jets_0_test, x_jets_1_test, x_jets_2_test, x_jets_3_test]
+    y_jets_train = [y_jets_0_train, y_jets_1_train, y_jets_2_train, y_jets_3_train]
+    y_jets_test = [y_jets_0_test, y_jets_1_test, y_jets_2_test, y_jets_3_test]
+
+    return x_jets_train, x_jets_test, y_jets_train, y_jets_test, ids
