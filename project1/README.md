@@ -1,22 +1,22 @@
 # ML_2017
 Github repository for ML course, 2017, EPFL
 
-# Project Title
+## Project Title
 
-# Getting Started
+## Getting Started
 
-# Prerequisites
+## Prerequisites
 
-# Installing
+## Installing
 
-# Running the tests
+## Running the tests
 
-# Break down into end to end tests
+## Break down into end to end tests
 
-# And coding style tests
+## And coding style tests
 
-# Deployment
+## Deployment
 
-# Authors
+## Authors
 
-# Acknowledgments
+## Acknowledgments
