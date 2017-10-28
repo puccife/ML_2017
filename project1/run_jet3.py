@@ -19,16 +19,13 @@ train_y, train_x, train_ids = load_csv_data(train_path)
 test_y, test_x, idstest_ids = load_csv_data(test_path)
 print("Datasets loaded in: " + str(time.time() - start_time))
 
-# Preprocessing dataset
-train_x, test_x = nan_to_mean(train_x, test_x)
-train_x, test_x = adjust_features(train_x, test_x)
-
 # Splitting dataset into 8 datasets to use 8 different classifiers
 x_jets_train, \
 x_jets_test, \
 y_jets_train, \
-y_jets_test, \
 ids = split_jets(train_x, train_y, test_x, test_y, idstest_ids)
+
+train_x, test_x = adjust_features(x_jets_train, x_jets_test)
 
 px_train = []
 px_test = []
@@ -48,6 +45,12 @@ for i in range(len(x_jets_train)):
     # Standardizing dataset
     x_jets_train[i], x_jets_test[i] = standardize(x_jets_train[i], x_jets_test[i])
 
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    df = pd.DataFrame(x_jets_train[i])
+    df.hist()
+    plt.show()
+
     # Building polynomial features
     px_train.append(build_poly(degree=degree,x=x_jets_train[i]))
     px_test.append(build_poly(degree=degree,x=x_jets_test[i]))
@@ -60,21 +63,17 @@ for i in range(len(x_jets_train)):
 
     # Predicting labels
     preds.append(predict_labels(w, px_test[i]))
+
+
 # ------------------------- LOCAL TEST -------------------------------
 # seed = 33
 # k_fold = 8
-# jet_to_train = 0
-# degree = 1
+# jet_to_train = 5
+# degree = 5
 #
 # x_jets_train[jet_to_train], x_jets_test[jet_to_train] = standardize(x_jets_train[jet_to_train], x_jets_test[jet_to_train])
 #
-# import pandas as pd
-# import matplotlib.pyplot as plt
-# df = pd.DataFrame(x_jets_train[jet_to_train])
-# df.hist()
-# plt.show()
-#
-# lambdas = np.logspace(-9, -1, 30)
+# lambdas = np.logspace(-6, -3, 100)
 # k_indices = build_k_indices(y_jets_train[jet_to_train], k_fold, seed)
 # rmse_tr = []
 # rmse_te = []

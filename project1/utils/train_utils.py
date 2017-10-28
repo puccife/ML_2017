@@ -42,16 +42,24 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 def get_lambda(i):
-    if i == 0:
-        return 3.03919538231e-07
-    elif i == 1:
-        return 2.39502661999e-08
-    elif i == 2:
-        return 1.61026202756e-07
-    elif i == 3:
-        return 1.26896100317e-08
+    lambdas = [
+        5.73615251045e-07,
+        1e-09,
+        0.0280721620394,
+        9.23670857187e-05,
+        0.0148735210729,
+        1.37382379588e-05,
+        0.0280721620394,
+        0.000329034456231
+    ]
+    return lambdas[i]
 
 
 def get_degree(i):
-    deg = [1,4,4,4]
-    return deg[i]
+    deg_mass = [
+        1,1,
+        3,5,
+        4,4,
+        3,5
+    ]
+    return deg_mass[i]
