@@ -59,103 +59,114 @@ def nan_to_mean(x, testx):
     return x, testx
 
 def adjust_features(x, testx):
-    square_mass = np.sqrt(x[:, DER_mass_MMC])
-    # square_mass_t = np.sqrt(x[:, DER_mass_transverse_met_lep])
-    px_tau = x[:, pri_tau_pt] * np.sin(x[:, pri_tau_phi])
-    py_tau = x[:, pri_tau_pt] * np.cos(x[:, pri_tau_phi])
-    pz_tau = x[:, pri_tau_pt] * np.sinh(x[:, pri_tau_eta])
-    mod_tau = x[:, pri_tau_pt] * np.cosh(x[:, pri_tau_eta])
-    # TRAIN - LEPT
-    px_lep = x[:, pri_lep_pt] * np.sin(x[:, pri_lep_phi])
-    py_lep = x[:, pri_lep_pt] * np.cos(x[:, pri_lep_phi])
-    pz_lep = x[:, pri_lep_pt] * np.sinh(x[:, pri_lep_eta])
-    mod_lep = x[:, pri_lep_pt] * np.cosh(x[:, pri_lep_eta])
-    # TEST - TAU
-    tsquare_mass = np.sqrt(testx[:, DER_mass_MMC])
-    # tsquare_mass_t = np.sqrt(testx[:, DER_mass_transverse_met_lep])
-    px_taut = testx[:, pri_tau_pt] * np.sin(testx[:, pri_tau_phi])
-    py_taut = testx[:, pri_tau_pt] * np.cos(testx[:, pri_tau_phi])
-    pz_taut = testx[:, pri_tau_pt] * np.sinh(testx[:, pri_tau_eta])
-    mod_taut = testx[:, pri_tau_pt] * np.cosh(testx[:, pri_tau_eta])
-    # TEST - LEPT
-    px_lept = testx[:, pri_lep_pt] * np.sin(testx[:, pri_lep_phi])
-    py_lept = testx[:, pri_lep_pt] * np.cos(testx[:, pri_lep_phi])
-    pz_lept = testx[:, pri_lep_pt] * np.sinh(testx[:, pri_lep_eta])
-    mod_lept = testx[:, pri_lep_pt] * np.cosh(testx[:, pri_lep_eta])
-
-    inv_log_cols = [0, 2, 5, 7, 9, 10, 13, 16, 19, 21, 23, 26]
     # Create inverse log values of features which are positive in value.
-    x_train_inv_log_cols = np.log(1 / (1 + x[:, inv_log_cols]))
-    x = np.hstack((x, x_train_inv_log_cols))
-    x_test_inv_log_cols = np.log(1 / (1 + testx[:, inv_log_cols]))
-    testx = np.hstack((testx, x_test_inv_log_cols))
+    for jet in range(len(x)):
+        if jet in (0,1,2,3):
+            if jet == 0:
+                x_delete_index = [3, 4, 5, 11, 22, 23, 24, 25, 26, 27, 28]
+                inv_log_cols = [1, 6, 8, 9, 12, 15, 18, 20]
+            if jet == 1:
+                x_delete_index = [4, 5, 6, 12, 23, 24, 25, 26, 27, 28, 29]
+                inv_log_cols = [0, 2, 7, 9, 10, 13, 16, 19, 21]
+            if jet == 2:
+                x_delete_index = [3, 4, 5, 11, 25, 26, 27]
+                inv_log_cols = [1, 6, 8, 9, 12, 15, 18, 20]
+            if jet == 3:
+                x_delete_index = [4, 5, 6, 12, 26, 27, 28]
+                inv_log_cols = [0, 2, 7, 9, 10, 13, 16, 19, 21]
+        elif jet in (4,5,6,7):
+            if jet in (4,6):
+                inv_log_cols = [1, 4, 6, 8, 9, 12, 15, 18, 20, 22, 25]
+            elif jet in (5,7):
+                inv_log_cols = [0, 2, 5, 7, 9, 10, 13, 16, 19, 21, 23, 26]
+            x_delete_index = []
 
-    train_features = [px_tau,py_tau,pz_tau,
-                      px_lep,py_lep,pz_lep, square_mass]
-    test_features = [px_taut, py_taut,pz_taut,
-                      px_lept,py_lept,pz_lept, tsquare_mass]
-    for feat in train_features:
-        x = np.column_stack((x, feat))
-    for feat in test_features:
-        testx = np.column_stack((testx, feat))
+        x_train_inv_log_cols = np.log(1 / (1 + x[jet][:, inv_log_cols]))
+        x[jet] = np.hstack((x[jet], x_train_inv_log_cols))
+        x_test_inv_log_cols = np.log(1 / (1 + testx[jet][:, inv_log_cols]))
+        testx[jet] = np.hstack((testx[jet], x_test_inv_log_cols))
+
+        x[jet] = remove_features(x[jet], x_delete_index)
+        testx[jet] = remove_features(testx[jet], x_delete_index)
+
+
+        # Preprocessing dataset
+        # x[jet], testx[jet] = nan_to_mean(x[jet], testx[jet])
+        # offset = 0 if jet % 2 == 0 else 1
+        # # TRAIN - TAU
+        # px_tau = x[jet][:, pri_tau_pt-offset] * np.sin(x[jet][:, pri_tau_phi-offset])
+        # py_tau = x[jet][:, pri_tau_pt-offset] * np.cos(x[jet][:, pri_tau_phi-offset])
+        # pz_tau = x[jet][:, pri_tau_pt-offset] * np.sinh(x[jet][:, pri_tau_eta-offset])
+        # # TRAIN - LEPT
+        # px_lep = x[jet][:, pri_lep_pt-offset] * np.sin(x[jet][:, pri_lep_phi-offset])
+        # py_lep = x[jet][:, pri_lep_pt-offset] * np.cos(x[jet][:, pri_lep_phi-offset])
+        # pz_lep = x[jet][:, pri_lep_pt-offset] * np.sinh(x[jet][:, pri_lep_eta-offset])
+        # # TEST - TAU
+        # px_taut = testx[jet][:, pri_tau_pt-offset] * np.sin(testx[jet][:, pri_tau_phi-offset])
+        # py_taut = testx[jet][:, pri_tau_pt-offset] * np.cos(testx[jet][:, pri_tau_phi-offset])
+        # pz_taut = testx[jet][:, pri_tau_pt-offset] * np.sinh(testx[jet][:, pri_tau_eta-offset])
+        # # TEST - LEPT
+        # px_lept = testx[jet][:, pri_lep_pt-offset] * np.sin(testx[jet][:, pri_lep_phi-offset])
+        # py_lept = testx[jet][:, pri_lep_pt-offset] * np.cos(testx[jet][:, pri_lep_phi-offset])
+        # pz_lept = testx[jet][:, pri_lep_pt-offset] * np.sinh(testx[jet][:, pri_lep_eta-offset])
+        #
+        # train_features = [px_tau,py_tau,pz_tau,
+        #                   px_lep,py_lep,pz_lep]
+        # test_features = [px_taut, py_taut,pz_taut,
+        #                   px_lept,py_lept,pz_lept]
+        # for feat in train_features:
+        #     x[jet] = np.column_stack((x[jet], feat))
+        # for feat in test_features:
+        #     testx[jet] = np.column_stack((testx[jet], feat))
+
     return x, testx
 
 def split_jets(train_x, train_y, test_x, test_y, idstest):
     jet_number = 22
+    jets = 4
+    x_jets_train = []
+    x_jets_test = []
+    y_jets_train = []
+    ids = []
+    for jet in range(jets):
+        x_jets_train.append(train_x[train_x[:, jet_number] == jet])
+        x_jets_test.append(test_x[test_x[:, jet_number] == jet])
+        ids_train = np.where([train_x[:, jet_number] == jet])[1]
+        y_jets_train.append(train_y[ids_train])
+        ids_test = np.where([test_x[:, jet_number] == jet])[1]
+        ids.append(idstest[ids_test])
 
-    x_jets_0_train = train_x[train_x[:, jet_number] == 0]
-    x_jets_1_train = train_x[train_x[:, jet_number] == 1]
-    x_jets_2_train = train_x[train_x[:, jet_number] == 2]
-    x_jets_3_train = train_x[train_x[:, jet_number] == 3]
 
-    x_jets_0_test = test_x[test_x[:, jet_number] == 0]
-    x_jets_1_test = test_x[test_x[:, jet_number] == 1]
-    x_jets_2_test = test_x[test_x[:, jet_number] == 2]
-    x_jets_3_test = test_x[test_x[:, jet_number] == 3]
+    mass_x_jets_train = []
+    mass_y_jets_train = []
+    mass_x_jets_test = []
+    mass_ids_jets_test = []
 
-    indices_x_0_train = np.where([train_x[:, jet_number] == 0])[1]
-    indices_x_1_train = np.where([train_x[:, jet_number] == 1])[1]
-    indices_x_2_train = np.where([train_x[:, jet_number] == 2])[1]
-    indices_x_3_train = np.where([train_x[:, jet_number] == 3])[1]
+    # FOR EACH JET
+    # FIRST WITHOUT MASS
+    # SECOND WITH MASS
 
-    y_jets_0_train = train_y[indices_x_0_train]
-    y_jets_1_train = train_y[indices_x_1_train]
-    y_jets_2_train = train_y[indices_x_2_train]
-    y_jets_3_train = train_y[indices_x_3_train]
+    for jet in range(jets):
+        indices_jet_nan_train = np.where([x_jets_train[jet][:, 0] == (-999)])[1]
+        indices_jet_Nnan_train = np.where([x_jets_train[jet][:, 0] != (-999)])[1]
+        indices_jet_nan_test = np.where([x_jets_test[jet][:, 0] == (-999)])[1]
+        indices_jet_Nnan_test = np.where([x_jets_test[jet][:, 0] != (-999)])[1]
 
-    indices_x_0_test = np.where([test_x[:, jet_number] == 0])[1]
-    indices_x_1_test = np.where([test_x[:, jet_number] == 1])[1]
-    indices_x_2_test = np.where([test_x[:, jet_number] == 2])[1]
-    indices_x_3_test = np.where([test_x[:, jet_number] == 3])[1]
+        mass_ids_jets_test.append(ids[jet][indices_jet_nan_test])
+        mass_ids_jets_test.append(ids[jet][indices_jet_Nnan_test])
 
-    y_jets_0_test = test_y[indices_x_0_test]
-    y_jets_1_test = test_y[indices_x_1_test]
-    y_jets_2_test = test_y[indices_x_2_test]
-    y_jets_3_test = test_y[indices_x_3_test]
+        x_jets_nan_train = x_jets_train[jet][indices_jet_nan_train]
+        x_jets_nan_train = np.delete(x_jets_nan_train, 0, 1)
+        mass_x_jets_train.append(x_jets_nan_train)
+        mass_x_jets_train.append(x_jets_train[jet][indices_jet_Nnan_train])
 
-    idstest_0 = idstest[indices_x_0_test]
-    idstest_1 = idstest[indices_x_1_test]
-    idstest_2 = idstest[indices_x_2_test]
-    idstest_3 = idstest[indices_x_3_test]
+        x_jets_nan_test = x_jets_test[jet][indices_jet_nan_test]
+        x_jets_nan_test = np.delete(x_jets_nan_test, 0, 1)
+        mass_x_jets_test.append(x_jets_nan_test)
+        mass_x_jets_test.append(x_jets_test[jet][indices_jet_Nnan_test])
 
-    x_delete_index_0 = []
-    x_delete_index_1 = []
-    x_delete_index_2 = []
-    x_delete_index_3 = []
+        mass_y_jets_train.append(y_jets_train[jet][indices_jet_nan_train])
+        mass_y_jets_train.append(y_jets_train[jet][indices_jet_Nnan_train])
 
-    x_jets_0_train = remove_features(x_jets_0_train, x_delete_index_0)
-    x_jets_0_test = remove_features(x_jets_0_test, x_delete_index_0)
-    x_jets_1_train = remove_features(x_jets_1_train, x_delete_index_1)
-    x_jets_1_test = remove_features(x_jets_1_test, x_delete_index_1)
-    x_jets_2_train = remove_features(x_jets_2_train, x_delete_index_2)
-    x_jets_2_test = remove_features(x_jets_2_test, x_delete_index_2)
-    x_jets_3_train = remove_features(x_jets_3_train, x_delete_index_3)
-    x_jets_3_test = remove_features(x_jets_3_test, x_delete_index_3)
-
-    ids = [idstest_0, idstest_1, idstest_2, idstest_3]
-    x_jets_train = [x_jets_0_train, x_jets_1_train, x_jets_2_train, x_jets_3_train]
-    x_jets_test = [x_jets_0_test, x_jets_1_test, x_jets_2_test, x_jets_3_test]
-    y_jets_train = [y_jets_0_train, y_jets_1_train, y_jets_2_train, y_jets_3_train]
-    y_jets_test = [y_jets_0_test, y_jets_1_test, y_jets_2_test, y_jets_3_test]
-
-    return x_jets_train, x_jets_test, y_jets_train, y_jets_test, ids
+    return mass_x_jets_train, mass_x_jets_test, mass_y_jets_train, mass_ids_jets_test
+    # return x_jets_train, x_jets_test, y_jets_train, ids
