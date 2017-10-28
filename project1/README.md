@@ -26,15 +26,15 @@ A `Sample-submission.csv` file is also there to show how your output should look
 ## Utilization
 Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
 ##### `costfunction.py`
-     * Sigmoid
+  * Sigmoid
 
-     * Mean Square Error [ **MSE** ]
+  * Mean Square Error [ **MSE** ]
 
-     * Mean Absolute Error [ **MAE** ] 
+  * Mean Absolute Error [ **MAE** ] 
 
-     * Log likelihood
+  * Log likelihood
 
-     * Compute_loss which computes the loss using one of the methods mentioned above
+  * Compute_loss which computes the loss using one of the methods mentioned above
 
 
 ## And coding style tests
