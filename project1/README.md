@@ -72,7 +72,9 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
 Run the file `run_jet` to get the same results we got.
 ### Playing around with values
 To change the degree of the features for each jet use the function `get_degree` in `train_utils.py`.
+
 To pick your best lambda, use cross-validation first to obtain it, and then place the best values inside the `get_lambdas` function in `train_utils.py`.
+
 You can also change the range of `lambdas` variable in the `FILL HERE` .
 
 
