@@ -25,7 +25,7 @@ Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extra
 A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
 ## Utilization
 Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
-##### costfunction.py
+#### costfunction.py
   * `Sigmoid`
 
   * `Mean Square Error [ **MSE** ]`
@@ -36,9 +36,9 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
 
   * `Compute_loss which computes the loss using one of the methods mentioned above`
 
-##### gradient.py
-` * compute_gradient`
-##### implementations.py
+#### gradient.py
+  * `compute_gradient`
+#### implementations.py
   * `least_squares [ Linear regression using normal equations ]`
   * `least_squares_gd [ Linear regression using gradient descent ]`
   * `least_squares_gd [ Linear regression using stochastic gradient descent ]`
@@ -47,9 +47,15 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
   * `reg_logistic_regression [ Regularized logistic regression ]`
   * `stochastic_gradient_descent`
   * `learning_by_gradient_descent`
-  * `build_k_indices [Building k indices for k-fold cross validation ]`
+  * `build_k_indices [Building k indices for k-fold cross validation.]`
   * `cross_validation`
-
+#### preprocessing.py
+  * `remove_features [ Removes features given column number.]`
+  * `standardize [ Standardizing the Training and Testing dataset with the same parameters.]`
+  * `nan_to_mean_jet [ Replaces -999 values with the mean of the feature for each jet.]`
+  * `nan_to_mean [ Replaces -999 values with the mean for all the features.]`
+  * `adjust_features [ Adding extra meaningful features to our training/testing sets.]`
+  * `split_jets [ splits the training/testing sets to their corresponding jet number.]`
 ## And coding style tests
 
 ## Deployment
