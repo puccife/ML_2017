@@ -25,8 +25,8 @@ Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extra
 A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
 ## Utilization
 Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
-##### `costfunction.py`
- ` * Sigmoid
+##### `costfunction.py
+  * Sigmoid
 
   * Mean Square Error [ **MSE** ]
 
@@ -38,8 +38,8 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
 
 ##### `gradient.py`
 `  * compute_gradient`
-##### `implementations.py`
- ` * least_squares [ Linear regression using normal equations ]
+##### `implementations.py
+  * least_squares [ Linear regression using normal equations ]
   * least_squares_gd [ Linear regression using gradient descent ]
   * least_squares_gd [ Linear regression using stochastic gradient descent ]
   * ridge_regression [ Ridge regression using normal equations ] 
