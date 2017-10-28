@@ -73,7 +73,9 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
 ## Deployment
 
 ## Authors
-Federico Pucci - pucci.federico@epfl.ch
-Mazen Mahdi - fouad.mazen@epfl.ch
-Davor Todorovski -
+*Federico Pucci - pucci.federico@epfl.ch
+
+*Mazen Mahdi - fouad.mazen@epfl.ch
+
+*Davor Todorovski -
 ## Acknowledgments
