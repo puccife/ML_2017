@@ -25,6 +25,12 @@ Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extra
 A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
 ## Utilization
 Inside the `utils` folder you will find several `.py` files, each of which contains functions that are used in the `run_jet` file. We will discuss them now briefly.
+##### `costfunction.py`
+...1.Sigmoid
+...2.Mean Square Error [ **MSE** ]
+...3.Mean Absolute Error [ **MAE** ] 
+...4.Log likelihood
+...5.Compute_loss which computes the loss using one of the methods mentioned above
 
 
 ## And coding style tests
