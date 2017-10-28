@@ -36,6 +36,19 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
 
   * Compute_loss which computes the loss using one of the methods mentioned above
 
+##### `gradient.py`
+  * compute_gradient
+##### `implementations.py`
+  * least_squares [ Linear regression using normal equations ]
+  * least_squares_gd [ Linear regression using gradient descent ]
+  * least_squares_gd [ Linear regression using stochastic gradient descent ]
+  * ridge_regression [ Ridge regression using normal equations ] 
+  * logistic_regression [ Logistic regression method ]
+  * reg_logistic_regression [ Regularized logistic regression ]
+  * stochastic_gradient_descent
+  * learning_by_gradient_descent
+  * build_k_indices [Building k indices for k-fold cross validation ]
+  * cross_validation
 
 ## And coding style tests
 
