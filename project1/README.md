@@ -18,10 +18,13 @@ For more information about the dataset and the physics background please refer t
 ## Prerequisites
 `Python 3+`
 ## Installing
+Use `git clone https://github.com/puccife/ML_2017.git ` to copy the repository into your local machine.
+## Dataset
+You will find the testing and training data in the folder named `Data`.
+Please open this file and unzip both `test.csv.zip` and `train.csv.zip` to extract the csv files.
+A `Sample-submission.csv` file is also there to show how your output should look like when submitting to Kaggle.
+## Utilization
 
-## Running the tests
-
-## Break down into end to end tests
 
 ## And coding style tests
 
