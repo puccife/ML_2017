@@ -1,12 +1,11 @@
-# ML_2017
-Github repository for ML course, 2017, EPFL
+# Project 1
 
-## Project Title
+## The Higgs Boson
 
 ## Getting Started
-
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 ## Prerequisites
-
+`Python 3+`
 ## Installing
 
 ## Running the tests
