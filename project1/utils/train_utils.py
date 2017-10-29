@@ -78,8 +78,8 @@ def get_degree(i):
     """
     deg_mass = [
         1,1,
-        3,5,
-        4,4,
-        3,5
+        2,2,
+        2,2,
+        2,2
     ]
     return deg_mass[i]

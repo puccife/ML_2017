@@ -52,8 +52,8 @@ def sort_predictions(ids, preds):
     :return: the list of predictions, sorted by the value of the index
     """
     predictions = []
-    for id, pred in zip(ids, preds):
-        for i, p in zip(id,pred):
+    for id_, pred in zip(ids, preds):
+        for i, p in zip(id_,pred):
             predictions.append([i, p])
     return zip(*sorted(predictions, key=lambda x: x[0]))
 

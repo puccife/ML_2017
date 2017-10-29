@@ -56,7 +56,7 @@ def adjust_features(x, testx):
         x[jet] = np.hstack((x[jet], x_train_inv_log_cols))
         x_test_inv_log_cols = np.log(1 / (1 + testx[jet][:, inv_log_cols]))
         testx[jet] = np.hstack((testx[jet], x_test_inv_log_cols))
-        x[jet], testx[jet] = add_cartesian_features(x, testx, jet)
+        #x[jet], testx[jet] = add_cartesian_features(x, testx, jet)
         # Removing features
         x[jet] = remove_features(x[jet], x_delete_index)
         testx[jet] = remove_features(testx[jet], x_delete_index)
@@ -70,23 +70,24 @@ def get_indexes(jet):
     """
     if jet in (0, 1, 2, 3):
         if jet == 0:
-            x_delete_index = [3, 4, 5, 11, 14, 17, 19, 22, 23, 24, 25, 26, 27, 28]
+            x_delete_index = [3, 4, 5, 11, 21, 22, 23, 24, 25, 26, 27, 28]
             inv_log_cols = [1, 6, 8, 9, 12, 15, 18, 20]
         if jet == 1:
-            x_delete_index = [4, 5, 6, 12, 15, 18, 20, 22, 23, 24, 25, 26, 27, 28, 29]
+            x_delete_index = [4, 5, 6, 12, 22, 23, 24, 25, 26, 27, 28, 29]
             inv_log_cols = [0, 2, 7, 9, 10, 13, 16, 19, 21]
         if jet == 2:
-            x_delete_index = [3, 4, 5, 11, 14, 17, 19, 22, 24, 25, 26, 27]
+            x_delete_index = [3, 4, 5, 11, 21, 22, 24, 25, 26, 27]
             inv_log_cols = [1, 6, 8, 9, 12, 15, 18, 20]
         if jet == 3:
-            x_delete_index = [4, 5, 6, 12, 15, 18, 20, 22, 25, 26, 27, 28]
-            inv_log_cols = [0, 1, 2, 3, 7, 9, 10, 13, 16, 19, 21]
+            x_delete_index = [4, 5, 6, 12, 22, 26, 27, 28]
+            inv_log_cols = [0, 2, 7, 9, 10, 13, 16, 19, 21]
     elif jet in (4, 5, 6, 7):
         if jet in (4, 6):
+            x_delete_index = [21]
             inv_log_cols = [1, 4, 6, 8, 9, 12, 15, 18, 20, 22, 25]
         elif jet in (5, 7):
+            x_delete_index=[22]
             inv_log_cols = [0, 2, 5, 7, 9, 10, 13, 16, 19, 21, 23, 26]
-        x_delete_index = []
     return inv_log_cols, x_delete_index
 
 def add_cartesian_features(x, testx, jet):
