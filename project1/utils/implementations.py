@@ -18,9 +18,9 @@ def least_squares_gd(y, tx, initial_w, max_iters, gamma):
         # compute gradient and loss
         gradient = compute_gradient(y, tx, w)
         loss = compute_loss(y, tx, w)
-
+        termine = np.dot(gamma,gradient)
         # update w by gradient
-        w -= gamma * gradient
+        w -= termine
 
     return w, loss
 
@@ -42,18 +42,24 @@ def least_squares_sgd(y, tx, initial_w, max_iters, gamma):
         # compute gradient and loss
         gradient = compute_gradient(mb_y, mb_tx, w)
         loss = compute_loss(y, tx, w)
-
+        termine = np.dot(gamma,gradient)
         # update w by gradient
-        w -= gamma * gradient
+        w -= termine
 
     return w, loss
 
 def least_squares(y, tx):
     """ Least squares regression using normal equations
     """
-    x_t = tx.T
-    w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx)), x_t), y)
+    # x_t = tx.T
+    # w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx)), x_t), y)
+    # loss = compute_loss(y, tx, w)
+    tx_transpose = np.transpose(tx)
+    gram_matrix = np.dot(tx_transpose,tx)
+    step_1 = np.linalg.solve(gram_matrix,tx_transpose)
+    w = np.dot(step_1,y)
     loss = compute_loss(y, tx, w)
+
     return w, loss
 
 def ridge_regression(y, tx, lambda_):
@@ -62,7 +68,14 @@ def ridge_regression(y, tx, lambda_):
     x_t = tx.T
     lambd = lambda_ * 2 * len(y)
 
-    w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx) + lambd * np.eye(tx.shape[1])), x_t), y)
+    gram_matrix = np.dot(x_t,tx)
+    term_1 = lambd * np.eye(tx.shape[1])
+    term_2 = gram_matrix + term_1
+
+    step_1 = np.linalg.solve(term_2,x_t)
+    w = np.dot(step_1,y)
+
+    #w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx) + lambd * np.eye(tx.shape[1])), x_t), y)
     loss = compute_loss(y, tx, w)
 
     return w, loss
@@ -144,6 +157,10 @@ def build_k_indices(y, k_fold, seed):
 
 def cross_validation(y, x, k_indices, k, lambda_, degree):
     """return the loss of ridge regression."""
+    max_iters =10000
+    gamma = 0.0000001
+    
+
     test_idx = k_indices[k]
     train_idx = k_indices[np.arange(len(k_indices)) != k]
     train_idx = train_idx.flatten()
@@ -154,10 +171,18 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     test_y = np.array([y[i] for i in test_idx])
     train_px = build_poly(x=train_x, degree=degree)
     test_px = build_poly(x=test_x, degree=degree)
-    ws, loss = ridge_regression(y=train_y, lambda_=lambda_, tx=train_px)
-    ridge_term = (np.linalg.norm(ws, ord=2)) ** 2
-    loss_tr = compute_loss(tx=train_px, w=ws, y=train_y) + ridge_term * lambda_
-    loss_te = compute_loss(tx=test_px, w=ws, y=test_y) + ridge_term * lambda_
+    #ws, loss = ridge_regression(y=train_y, lambda_=lambda_, tx=train_px)
+
+    ws, loss_tr = logistic_regression(train_y, train_px, None, max_iters, gamma)
+
+    #ridge_term = (np.linalg.norm(ws, ord=2)) ** 2
+    #loss_tr = compute_loss(tx=train_px, w=ws, y=train_y) + ridge_term * lambda_
+    #loss_te = compute_loss(tx=test_px, w=ws, y=test_y) + ridge_term * lambda_
+    
+    #print(loss)
+    test_a = (1 + test_y) / 2
+    loss_te = compute_loss_neg_log_likelihood(tx=test_px,w=ws,y=test_a)
+
     y_pred_0 = predict_labels(ws, test_px)
     accuracy_0 = 1 - np.mean(y_pred_0 != test_y)
     print("Accuracy: " + str(accuracy_0) + "%")

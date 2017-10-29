@@ -40,7 +40,7 @@ x_jets_train[jet_to_train], x_jets_test[jet_to_train] = standardize(x_jets_train
 k_indices = build_k_indices(y_jets_train[jet_to_train], k_fold, seed)
 rmse_tr = []
 rmse_te = []
-best_loss = 999
+best_loss = 50000
 best_lambda = 0
 for lambda_ in lambdas:
     temp_tr = np.zeros(k_fold)
