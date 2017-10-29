@@ -23,14 +23,12 @@ def load_csv_data(data_path, sub_sample=False):
 
     return yb, input_data, ids
 
-
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)
     y_pred[np.where(y_pred <= 0)] = -1
     y_pred[np.where(y_pred > 0)] = 1
     return y_pred
-
 
 def create_csv_submission(ids, y_pred, name):
     """
@@ -47,6 +45,12 @@ def create_csv_submission(ids, y_pred, name):
             writer.writerow({'Id':int(r1),'Prediction':int(r2)})
 
 def sort_predictions(ids, preds):
+    """
+    This method is used to sort the predictions based on the ids of each prediction
+    :param ids: ids of predictions
+    :param preds: predictions
+    :return: the list of predictions, sorted by the value of the index
+    """
     predictions = []
     for id, pred in zip(ids, preds):
         for i, p in zip(id,pred):

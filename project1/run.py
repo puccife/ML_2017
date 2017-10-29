@@ -25,7 +25,8 @@ x_jets_test, \
 y_jets_train, \
 ids = split_jets(train_x, train_y, test_x, test_y, idstest_ids)
 
-train_x, test_x = adjust_features(x_jets_train, x_jets_test)
+# Adjusting features of the dataset
+x_jets_train, x_jets_test = adjust_features(x_jets_train, x_jets_test)
 
 px_train = []
 px_test = []
@@ -45,12 +46,6 @@ for i in range(len(x_jets_train)):
     # Standardizing dataset
     x_jets_train[i], x_jets_test[i] = standardize(x_jets_train[i], x_jets_test[i])
 
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    df = pd.DataFrame(x_jets_train[i])
-    df.hist()
-    plt.show()
-
     # Building polynomial features
     px_train.append(build_poly(degree=degree,x=x_jets_train[i]))
     px_test.append(build_poly(degree=degree,x=x_jets_test[i]))
@@ -63,44 +58,6 @@ for i in range(len(x_jets_train)):
 
     # Predicting labels
     preds.append(predict_labels(w, px_test[i]))
-
-
-# ------------------------- LOCAL TEST -------------------------------
-# seed = 33
-# k_fold = 8
-# jet_to_train = 5
-# degree = 5
-#
-# x_jets_train[jet_to_train], x_jets_test[jet_to_train] = standardize(x_jets_train[jet_to_train], x_jets_test[jet_to_train])
-#
-# lambdas = np.logspace(-6, -3, 100)
-# k_indices = build_k_indices(y_jets_train[jet_to_train], k_fold, seed)
-# rmse_tr = []
-# rmse_te = []
-# best_loss = 999
-# best_lambda = 0
-# for lambda_ in lambdas:
-#     temp_tr = np.zeros(k_fold)
-#     temp_te = np.zeros(k_fold)
-#     for k in range(k_fold):
-#         tr_loss, te_loss, ws = cross_validation(y_jets_train[jet_to_train], x_jets_train[jet_to_train], k_indices, k, lambda_, degree)
-#         temp_tr[k] = tr_loss
-#         temp_te[k] = te_loss
-#     print(np.mean(temp_te))
-#     print(np.mean(temp_tr))
-#     if np.mean(temp_te) < best_loss:
-#         best_loss = np.mean(temp_te)
-#         best_lambda = lambda_
-#     print("After lambdas iteration, the best lambda is : " + str(best_lambda) + " for Lambda : " + str(lambda_) + " with best loss = " + str(best_loss))
-#     rmse_tr.append(np.mean(temp_tr))
-#     rmse_te.append(np.mean(temp_te))
-# cross_validation_visualization(lambdas, rmse_tr, rmse_te)
-# ------------------------- ONLINE TEST ----------------------------------
-# w_sgd0, loss_sgd0 = logistic_regression(y_jets_0_train, px_train_0, None, 200, gamma)
-# w_sgd1, loss_sgd1 = logistic_regression(y_jets_1_train, px_train_1, None, 200, gamma)
-# w_sgd2, loss_sgd2 = logistic_regression(y_jets_2_train, px_train_2, None, 200, gamma)
-# w_sgd3, loss_sgd3 = logistic_regression(y_jets_3_train, px_train_3, None, 200, gamma)
-# ----------------q------ CREATE SUBMISSION --------------------------------
 
 # Sorting predictions
 ids, preds = sort_predictions(ids, preds)
