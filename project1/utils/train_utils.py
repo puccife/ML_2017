@@ -1,6 +1,14 @@
 import numpy as np
 
 def split_data(x, y, ratio, seed=1):
+    """
+        Split training set into training and testing set given the ratio and the seed
+    :param x: features matrix X of training
+    :param y: labels vector y of training
+    :param ratio: ratio for splitting training set
+    :param seed: seed used to shuffle the set
+    :return: training and testing set given the ratio
+    """
     np.random.seed(seed)
     np.random.shuffle(x)
     np.random.seed(seed)
@@ -11,6 +19,12 @@ def split_data(x, y, ratio, seed=1):
     return train_x, train_y, test_x, test_y
 
 def build_poly(x, degree):
+    """
+    Build polynomial features of matrix X, given a selected degree
+    :param x: features matrix X
+    :param degree: degree used to create the polynomial
+    :return: the features matrix X after polynomial expansion
+    """
     px = np.ones(len(x))
     px = np.c_[px, np.sqrt(np.abs(x))]
     for n in range(degree):
@@ -42,20 +56,26 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 def get_lambda(i):
+
+    """
+    This method is used to get the correct lambda for each classifier
+    :param i: Number of classifier
+    :return: lambda of the i-th classifier
+    """
     lambdas = [
-        5.73615251045e-07,
-        1e-09,
-        0.0280721620394,
-        9.23670857187e-05,
-        0.0148735210729,
-        1.37382379588e-05,
-        0.0280721620394,
-        0.000329034456231
+        1e-09,1e-09,
+        0.01,0.000117210229753,
+        0.00329034456231,1.61026202756e-08,
+        0.0148735210729,1e-09
     ]
     return lambdas[i]
 
-
 def get_degree(i):
+    """
+    This method is used to get the correct degree for each classifier
+    :param i: Number of classifier
+    :return: degree of the i-th classifier
+    """
     deg_mass = [
         1,1,
         3,5,
