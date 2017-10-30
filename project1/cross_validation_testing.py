@@ -9,7 +9,6 @@ import numpy as np
 #   - prediction.csv dataset predicted by the model
 train_path = './data/train.csv'
 test_path = './data/test.csv'
-OUTPUT = 'jet_pred/prediction.csv'
 
 # Loading datasets
 start_time = time.time()
@@ -23,24 +22,20 @@ x_jets_train, \
 x_jets_test, \
 y_jets_train, \
 ids = split_jets(train_x, train_y, test_x, test_y, idstest_ids)
-
 # Adjusting features of the dataset
 x_jets_train, x_jets_test = adjust_features(x_jets_train, x_jets_test)
-
-# PARAMS for k-fold cross validation
+# PARAMS for k-fold cross validation with ridge regression
 seed = 33
 k_fold = 8
-jet_to_train = 4
-degree = 3
+jet_to_train = 0
+degree = 1
 lambdas = np.logspace(-9, -1, 30)
-
 # Standardizing dataset
 x_jets_train[jet_to_train], x_jets_test[jet_to_train] = standardize(x_jets_train[jet_to_train], x_jets_test[jet_to_train])
-
 k_indices = build_k_indices(y_jets_train[jet_to_train], k_fold, seed)
 rmse_tr = []
 rmse_te = []
-best_loss = 50000
+best_loss = 999999
 best_lambda = 0
 for lambda_ in lambdas:
     temp_tr = np.zeros(k_fold)
@@ -57,6 +52,5 @@ for lambda_ in lambdas:
     print("After lambdas iteration, the best lambda is : " + str(best_lambda) + " for Lambda : " + str(lambda_) + " with best loss = " + str(best_loss))
     rmse_tr.append(np.mean(temp_tr))
     rmse_te.append(np.mean(temp_te))
-
 # Saving cross validation visualization as png file named cross_validation.png
 cross_validation_visualization(lambdas, rmse_tr, rmse_te)

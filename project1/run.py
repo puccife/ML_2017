@@ -10,7 +10,7 @@ import numpy as np
 #   - prediction.csv dataset predicted by the model
 train_path = './data/train.csv'
 test_path = './data/test.csv'
-OUTPUT = 'jet_pred/prediction.csv'
+OUTPUT = 'predictions/prediction.csv'
 
 # Loading datasets
 start_time = time.time()
