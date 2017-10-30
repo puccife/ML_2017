@@ -69,21 +69,16 @@ Inside the `utils` folder you will find several `.py` files, each of which conta
      * `get_lambda [ Place your best lambdas from cross validation manually here.]`
      * `get_degree [ Place the best degree for each jet here.]`
 ## Running
-Run the file `run_jet` to get the same results we got.
+Run the file `run.py` to get the same results we got.
 ### Playing around with values
 To change the degree of the features for each jet use the function `get_degree` in `train_utils.py`.
 
 To pick your best lambda, use cross-validation first to obtain it, and then place the best values inside the `get_lambdas` function in `train_utils.py`.
 
-You can also change the range of `lambdas` variable in the `FILL HERE` .
-
 
 ## Authors
-  * Davor Todorovski -
-
-  * Federico Pucci - pucci.federico@epfl.ch
-
   * Mazen Mahdi - fouad.mazen@epfl.ch
-
+  * Federico Pucci - pucci.federico@epfl.ch
+  * Davor Todorovski - davor.todorovski@epfl.ch
   
 ## Acknowledgments
