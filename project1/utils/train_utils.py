@@ -77,9 +77,9 @@ def get_degree(i):
     :return: degree of the i-th classifier
     """
     deg_mass = [
-        1,1,
-        2,2,
-        2,2,
-        2,2
+        4,4,
+        5,6,
+        6,8,
+        8,8
     ]
     return deg_mass[i]
