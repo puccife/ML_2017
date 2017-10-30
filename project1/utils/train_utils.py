@@ -63,10 +63,10 @@ def get_lambda(i):
     :return: lambda of the i-th classifier
     """
     lambdas = [
-        1e-09,1e-09,
-        0.01,0.000117210229753,
-        0.00329034456231,1.61026202756e-08,
-        0.0148735210729,1e-09
+        0.000621016941892,1.37382379588e-05,
+        0.00017433288222,9.23670857187e-05,
+        0.00788046281567,1.08263673387e-06,
+        0.0529831690628,1e-09
     ]
     return lambdas[i]
 
@@ -77,9 +77,9 @@ def get_degree(i):
     :return: degree of the i-th classifier
     """
     deg_mass = [
-        4,4,
+        4,2,
         5,6,
-        6,8,
-        8,8
+        5,7,
+        5,6
     ]
     return deg_mass[i]
