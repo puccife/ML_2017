@@ -69,7 +69,7 @@ def least_squares(y, tx):
 def ridge_regression(y, tx, lambda_):
     """
     Ridge regression using normal equation
-    ::param y: label vector y
+    :param y: label vector y
     :param tx: features matrix X
     :param lambda_: lambda used for regularization
     :return: weights and loss
@@ -130,28 +130,15 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
 def penalized_logistic_regression(y, tx, w, lambda_):
     """return the loss, gradient, and hessian."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # return loss, gradient, and hessian: TODO
-    # **************************************************
-    #t = np.dot(tx,w)
-   
-    
     loss = compute_loss_neg_log_likelihood(y,tx,w)
     norm = np.linalg.norm(w)
     norm_squared = norm**2
-
     loss = loss + (lambda_*norm_squared)
-    
     gradient_regularized=[]
     for i in range(w.shape[0]):
         gradient_regularized.append(lambda_*4*norm*w[i])
-    
-    
     gradient =  np.dot(tx.T, sigmoid(np.dot(tx, w)) - y)
     gradient = gradient + gradient_regularized
-    
-    
     return loss, gradient
 
 def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
@@ -159,45 +146,35 @@ def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
     Do one step of gradient descent, using the penalized logistic regression.
     Return the loss and updated w.
     """
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # return loss, gradient: TODO
-    # ***************************************************
-  
     loss, gradient = penalized_logistic_regression(y,tx,w,lambda_)
-    #raise NotImplementedError
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # update w: TODO
-    # ***************************************************
-    
     termine = np.dot(gamma,gradient)
     w = w - termine
-    
-    #raise NotImplementedError
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    """Regularized logistic regression"""
-    if (initial_w is None):
-        initial_w = np.zeros(tx.shape[1])
-
-    w = initial_w
+    """
+    Logistic regression using gradient descent
+    :param y: label vector y
+    :param tx: features matrix X
+    :param lambda_: lambda used for regularization
+    :param initial_w: initial weights vector
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: weights and loss after each logistic regression
+    """
     y = (1 + y) / 2
     losses = []
-    threshold = 0.1
-
-    # start the logistic regression
+    threshold = 0.0001
+    if (initial_w is None):
+        initial_w = np.zeros(tx.shape[1])
+    w = initial_w
     for iter in range(max_iters):
-        # get loss and update w.
-       
+        # Learning by penalized gradient descent
         w, loss = learning_by_penalized_gradient(y, tx, w, gamma,lambda_)
-        #losses.append(loss)
-
-        # converge criteria
+        losses.append(loss)
+        # Stopping criterion
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-
     return w, loss
 
 def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
