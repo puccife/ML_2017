@@ -4,108 +4,124 @@ from utils.train_utils import batch_iter, build_poly
 from utils.gradient import compute_gradient
 from utils.costfunction import compute_loss, compute_loss_neg_log_likelihood, sigmoid
 def least_squares_gd(y, tx, initial_w, max_iters, gamma):
-    """ Linear regression using gradient descent
     """
-    # if initial_w is None, we initialize it to a zeros vector
+    Least squares using gradient descent
+    :param y: label vector y
+    :param tx: features matrix X
+    :param initial_w: initial weights w
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: weights and loss after gradient descent
+    """
+    # Initialize parameters
+    loss = 999
     if (initial_w is None):
         initial_w = np.zeros(tx.shape[1])
-
-    # Define parameters to store weight and loss
-    loss = 0
     w = initial_w
-
     for n_iter in range(max_iters):
         # compute gradient and loss
         gradient = compute_gradient(y, tx, w)
         loss = compute_loss(y, tx, w)
         termine = np.dot(gamma,gradient)
         # update w by gradient
-        w -= termine
-
+        w = w - termine
     return w, loss
 
 def least_squares_sgd(y, tx, initial_w, max_iters, gamma):
-    """ Linear regression using stochastic gradient descent
     """
-    # if initial_w is None, we initialize it to a zeros vector
+    Least squares using stochastic gradient descent
+    ::param y: label vector y
+    :param tx: features matrix X
+    :param initial_w: initial weights w
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: weights and loss after stochastic gradient descent
+    """
+    # Initialize parameters, batchsize = 1 for SGD
+    loss = 999
+    batch_size = 1
     if (initial_w is None):
         initial_w = np.zeros(tx.shape[1])
-
-    # Define parameters of the algorithm
-    batch_size = 1
-
-    # Define parameters to store w and loss
-    loss = 0
     w = initial_w
-
     for n_iter, [mb_y, mb_tx] in enumerate(batch_iter(y, tx, batch_size, max_iters)):
         # compute gradient and loss
         gradient = compute_gradient(mb_y, mb_tx, w)
         loss = compute_loss(y, tx, w)
         termine = np.dot(gamma,gradient)
-        # update w by gradient
-        w -= termine
-
+        # update w
+        w = w - termine
     return w, loss
 
 def least_squares(y, tx):
-    """ Least squares regression using normal equations
     """
-    # x_t = tx.T
-    # w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx)), x_t), y)
-    # loss = compute_loss(y, tx, w)
+    Least squares using normal equation
+    ::param y: label vector y
+    :param tx: features matrix X
+    :return: weights and loss
+    """
     tx_transpose = np.transpose(tx)
     gram_matrix = np.dot(tx_transpose,tx)
     step_1 = np.linalg.solve(gram_matrix,tx_transpose)
     w = np.dot(step_1,y)
     loss = compute_loss(y, tx, w)
-
     return w, loss
 
 def ridge_regression(y, tx, lambda_):
-    """ Ridge regression using normal equations
+    """
+    Ridge regression using normal equation
+    ::param y: label vector y
+    :param tx: features matrix X
+    :param lambda_: lambda used for regularization
+    :return: weights and loss
     """
     x_t = tx.T
-    lambd = lambda_ * 2 * len(y)
-
+    lam_ = lambda_ * 2 * len(y)
     gram_matrix = np.dot(x_t,tx)
-    term_1 = lambd * np.eye(tx.shape[1])
+    term_1 = lam_ * np.eye(tx.shape[1])
     term_2 = gram_matrix + term_1
-
     step_1 = np.linalg.solve(term_2,x_t)
     w = np.dot(step_1,y)
-
-    #w = np.dot(np.dot(np.linalg.inv(np.dot(x_t, tx) + lambd * np.eye(tx.shape[1])), x_t), y)
     loss = compute_loss(y, tx, w)
-
+    ridge_term = (np.linalg.norm(w, ord=2)) ** 2
+    loss = loss + ridge_term * lambda_
     return w, loss
 
 def learning_by_gradient_descent(y, tx, w, gamma):
     """
-    Do one step of gradient descen using logistic regression.
-    Return the loss and the updated w.
+    Learning by gradient descent step
+    ::param y: label vector y
+    :param tx: features matrix X
+    :param w: actual weights
+    :param gamma: stepsize
+    :return: weights and loss after each step
     """
     loss = compute_loss_neg_log_likelihood(y, tx, w)
     gradient = np.dot(tx.T, sigmoid(np.dot(tx, w)) - y)
-
-    w -= gamma * gradient
-
+    w = w - gamma * gradient
     return w, loss
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    """Logistic regression"""
-    if initial_w is None:
-        initial_w = np.zeros(tx.shape[1])
-    w = initial_w
+    """
+    Logistic regression using gradient descent
+    ::param y: label vector y
+    :param tx: features matrix X
+    :param initial_w: initial weights vector
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: weights and loss after each logistic regression
+    """
+    # Convert range of Y in {0,1} instead of {-1,1}
     y = (1 + y) / 2
     losses = []
     threshold = 0.0001
-    # start the logistic regression
+    if initial_w is None:
+        initial_w = np.zeros(tx.shape[1])
+    w = initial_w
     for _ in range(max_iters):
-        # get loss and update w.
+        # Learning by gradient descent
         w, loss = learning_by_gradient_descent(y, tx, w, gamma)
         losses.append(loss)
-        # converge criteria
+        # Stopping criterion
         if _ % 100 == 0:
             print("Loss after " + str(_) + " iterations = " + str(loss))
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
@@ -113,31 +129,45 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    """Regularized logistic regression"""
-    if (initial_w is None):
-        initial_w = np.zeros(tx.shape[1])
-
-    w = initial_w
+    """
+Logistic regression using gradient descent
+    :param y: label vector y
+    :param tx: features matrix X
+    :param lambda_: lambda used for regularization
+    :param initial_w: initial weights vector
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: weights and loss after each logistic regression
+    """
     y = (1 + y) / 2
     losses = []
-    threshold = 0.1
-
-    # start the logistic regression
+    threshold = 0.0001
+    if (initial_w is None):
+        initial_w = np.zeros(tx.shape[1])
+    w = initial_w
+    # Convert range of Y in {0,1} instead of {-1,1}
     for iter in range(max_iters):
-        # get loss and update w.
+        # Learning by gradient descent
         w, loss = learning_by_gradient_descent(y, tx, w, gamma)
         losses.append(loss)
-
-        # converge criteria
+        # Stopping criterion
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-
-    norm = sum(w ** 2)
-    cost = w + lambda_ * norm / (2 * np.shape(w)[0])
-
-    return w, cost
+    normed_w = sum(w ** 2)
+    loss = w + lambda_ * normed_w / (2 * w.shape[0])
+    return w, loss
 
 def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
+    """
+    Compute gradient using stochastic gradient descent
+    :param y: label vector y
+    :param tx: features matrix X
+    :param initial_w: initial weights vector
+    :param batch_size: = 1 for SGD
+    :param max_iters: number of iterations
+    :param gamma: stepsize
+    :return: loss, ws after stochastic gradient descent
+    """
     loss = 0
     ws = initial_w
     for b_y, b_x in batch_iter(y, tx, batch_size, max_iters):
@@ -156,11 +186,16 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 def cross_validation(y, x, k_indices, k, lambda_, degree):
-    """return the loss of ridge regression."""
-    max_iters =10000
-    gamma = 0.0000001
-    
-
+    """
+    Cross validation used for ridge regression
+    ::param y: label vector y
+    :param tx: features matrix X
+    :param k_indices: k - indices builded for cross validation
+    :param k: actual k fold indices
+    :param lambda_: lambda used for regularization
+    :param degree: polynomial degree of the model (+ sqrt)
+    :return: training loss, testing loss, final weights
+    """
     test_idx = k_indices[k]
     train_idx = k_indices[np.arange(len(k_indices)) != k]
     train_idx = train_idx.flatten()
@@ -171,18 +206,9 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     test_y = np.array([y[i] for i in test_idx])
     train_px = build_poly(x=train_x, degree=degree)
     test_px = build_poly(x=test_x, degree=degree)
-    #ws, loss = ridge_regression(y=train_y, lambda_=lambda_, tx=train_px)
-
-    ws, loss_tr = logistic_regression(train_y, train_px, None, max_iters, gamma)
-
-    #ridge_term = (np.linalg.norm(ws, ord=2)) ** 2
-    #loss_tr = compute_loss(tx=train_px, w=ws, y=train_y) + ridge_term * lambda_
-    #loss_te = compute_loss(tx=test_px, w=ws, y=test_y) + ridge_term * lambda_
-    
-    #print(loss)
-    test_a = (1 + test_y) / 2
-    loss_te = compute_loss_neg_log_likelihood(tx=test_px,w=ws,y=test_a)
-
+    ws, loss_tr = ridge_regression(y=train_y, lambda_=lambda_, tx=train_px)
+    ridge_term = (np.linalg.norm(ws, ord=2)) ** 2
+    loss_te = compute_loss(tx=test_px, w=ws, y=test_y) + ridge_term * lambda_
     y_pred_0 = predict_labels(ws, test_px)
     accuracy_0 = 1 - np.mean(y_pred_0 != test_y)
     print("Accuracy: " + str(accuracy_0) + "%")
