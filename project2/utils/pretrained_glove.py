@@ -25,3 +25,15 @@ class GloveTrainer:
             self.embeddings_index[word] = coefs
         f.close()
         return self.embeddings_index
+
+
+    def manipulate_dataset(self, dataset, word_embeddings):
+        for i in range(len(dataset)):
+            matrix_embedding = []
+            for word in dataset[i][0].split():
+                try:
+                    matrix_embedding.append(word_embeddings[word])
+                except:
+                    print("word: " + word)
+            dataset[i] = ((matrix_embedding, dataset[i][1]))
+        return dataset
