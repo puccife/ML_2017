@@ -1,5 +1,6 @@
-class DatasetManipulator:
+import numpy as np
 
+class DatasetManipulator:
 
     negative_url = None
 
@@ -40,6 +41,7 @@ class DatasetManipulator:
             loadedInstances = loadedInstances+1
         negative_tweets.close()
         positive_tweets.close()
+        return self.get_tweets()
 
 
     def split_and_shuffle(self, tweets, ratio, seed):
