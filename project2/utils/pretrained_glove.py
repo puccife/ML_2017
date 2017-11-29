@@ -34,6 +34,7 @@ class GloveTrainer:
                 try:
                     matrix_embedding.append(word_embeddings[word])
                 except:
-                    print("word: " + word)
+                    word
+                    # print("word: " + word)
             dataset[i] = ((matrix_embedding, dataset[i][1]))
         return dataset
