@@ -19,6 +19,6 @@ def main(args):
   tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
   train, test = dm.split_and_shuffle(tweets_glove, ratio=FLAGS.ratio, seed=FLAGS.seed)
   # Training model
-  dt = DNCTrainer(train, )
+  dt = DNCTrainer(train, FLAGS)
 if __name__ == "__main__":
   tf.app.run()
