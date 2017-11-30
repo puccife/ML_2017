@@ -1,23 +1,19 @@
 import os
 import numpy as np
 
-GLOVE_DIR = 'glove.twitter.27B/'
-glove_25 = 'glove.twitter.27B.25d.txt'
-glove_50 = 'glove.twitter.27B.50d.txt'
-glove_100 = 'glove.twitter.27B.100d.txt'
-glove_200 = 'glove.twitter.27B.200d.txt'
-
 class GloveTrainer:
 
     embeddings_index = {}
     vector_size = None
+    GLOVE_DIR = None
 
-    def __init__(self, vector_size=25):
+    def __init__(self, vector_size, glove_dir):
         self.vector_size = vector_size
+        self.GLOVE_DIR = glove_dir
 
     def generate_word_embeddings(self):
         print('Indexing word vectors.')
-        f = open(os.path.join(GLOVE_DIR, 'glove.twitter.27B.'+str(self.vector_size)+'d.txt'))
+        f = open(os.path.join(self.GLOVE_DIR, 'glove.twitter.27B.'+str(self.vector_size)+'d.txt'))
         for line in f:
             values = line.split()
             word = values[0]
