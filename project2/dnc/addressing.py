@@ -22,7 +22,7 @@ import collections
 import sonnet as snt
 import tensorflow as tf
 
-import util
+import dnc.util as util
 
 # Ensure values are greater than epsilon to avoid numerical instability.
 _EPSILON = 1e-6

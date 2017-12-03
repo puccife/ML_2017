@@ -36,7 +36,7 @@ class DatasetManipulator:
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
             raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,0))
+            self.tweets.append((raw_negative,-1))
             self.tweets.append((raw_positive,1))
             loadedInstances = loadedInstances+1
         negative_tweets.close()

@@ -16,7 +16,7 @@
   "report_interval": "10",
   "checkpoint_dir" : "/checkpoints/tmp",
   "checkpoint_interval": "-1",
-  "word_dimension" : "50",
+  "word_dimension" : "25",
   "max_lenght" : "150",
   "dataset_neg" : "./twitter-datasets/train_neg.txt",
   "dataset_pos" : "./twitter-datasets/train_pos.txt",

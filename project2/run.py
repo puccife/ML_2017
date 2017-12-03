@@ -10,15 +10,16 @@ FLAGS = al.get_configuration()
 
 def main(args):
   tf.logging.set_verbosity(3)
-  # Glove word embeddings model
   gt = GloveTrainer(vector_size=FLAGS.word_dimension, glove_dir=FLAGS.glove_dir)
   word_embeddings = gt.generate_word_embeddings()
-  # Dataset manipulator
   dm = DatasetManipulator(FLAGS.dataset_pos,FLAGS.dataset_neg)
   tweets = dm.generate_dataset(total_samples=FLAGS.total_samples)
   tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
-  train, test = dm.split_and_shuffle(tweets_glove, ratio=FLAGS.ratio, seed=FLAGS.seed)
+  training_set, testing_set = dm.split_and_shuffle(tweets_glove, ratio=FLAGS.ratio, seed=FLAGS.seed)
   # Training model
-  dt = DNCTrainer(train, FLAGS)
+  dt = DNCTrainer(FLAGS)
+  dt.train_model()
+  # print(first_sequence)
+
 if __name__ == "__main__":
   tf.app.run()
