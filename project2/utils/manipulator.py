@@ -36,7 +36,7 @@ class DatasetManipulator:
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
             raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,-1))
+            self.tweets.append((raw_negative,0))
             self.tweets.append((raw_positive,1))
             loadedInstances = loadedInstances+1
         negative_tweets.close()
@@ -52,3 +52,55 @@ class DatasetManipulator:
         np.random.seed(seed)
         np.random.shuffle(test)
         return train, test
+
+    def get_generator(self, training_set, FLAGS):
+        word_size = FLAGS.word_dimension
+        batch_size = FLAGS.batch_size
+        max_lenght = FLAGS.max_lenght
+        num_classes = FLAGS.num_classes
+
+        batched_input = []
+        batched_label = []
+        batched_mask = []
+
+        i = 0
+        num_batch = 0
+        batch_completed = False
+        while i < (len(training_set) + 1):
+            if not batch_completed:
+                if len(batched_input) < batch_size:
+                    data = training_set[i][0]
+                    data = data[:max_lenght]
+                    if len(data) > 0:
+                        padded = np.lib.pad(data, ((max_lenght - len(data), 0), (0, 0)), 'constant', constant_values=(0))
+                        delta = 1.0 / (len(data))
+                    else:
+                        padded = np.zeros(shape=[max_lenght, word_size])
+                        delta = 1.0
+                    batched_input.append(padded)
+                    if True:
+                        label = np.zeros(shape=[max_lenght,num_classes])
+                        for j in range(0,max_lenght):
+                            np.put(label[j],training_set[i][1],1.0)
+                        batched_label.append(label)
+                        mask = np.zeros(max_lenght)
+                        weight = np.zeros(len(data))
+                        for number in range(0, len(data)):
+                            np.put(weight, number, delta * (number + 1))
+                        np.put(mask, np.arange(max_lenght - len(data), max_lenght), weight)
+                        batched_mask.append(mask)
+                        i += 1
+                else:
+                    reshaped = np.reshape(batched_input, newshape=[batch_size, max_lenght, word_size])
+                    labels = np.reshape(batched_label, newshape=[batch_size, max_lenght, num_classes])
+                    masks = np.reshape(batched_mask, newshape=[batch_size, max_lenght])
+                    toAppend = (reshaped, labels, masks)
+                    num_batch += 1
+                    if (len(training_set) // batch_size) == num_batch:
+                        batch_completed = True
+                    batched_input = []
+                    batched_label = []
+                    batched_mask = []
+                    yield toAppend
+            else:
+                break
