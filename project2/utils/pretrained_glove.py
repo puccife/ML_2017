@@ -6,6 +6,7 @@ class GloveTrainer:
     embeddings_index = {}
     vector_size = None
     GLOVE_DIR = None
+    missing_voc = None
 
     def __init__(self, vector_size, glove_dir):
         self.vector_size = vector_size
@@ -24,13 +25,20 @@ class GloveTrainer:
 
 
     def manipulate_dataset(self, dataset, word_embeddings):
+        self.missing_voc = {}
         for i in range(len(dataset)):
             matrix_embedding = []
             for word in dataset[i][0].split():
                 try:
                     matrix_embedding.append(word_embeddings[word])
                 except:
-                    word
+                    try:
+                        self.missing_voc[word] = self.missing_voc[word] + 1
+                    except KeyError:
+                        self.missing_voc[word] = 1
                     # print("word: " + word)
             dataset[i] = ((matrix_embedding, dataset[i][1]))
         return dataset
+
+    def get_missing_voc(self):
+        return self.missing_voc

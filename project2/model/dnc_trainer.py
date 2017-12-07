@@ -21,6 +21,7 @@ class DNCTrainer:
     dm = None
     training_set = None
     testing_set = None
+    missing_voc = None
 
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
@@ -33,6 +34,8 @@ class DNCTrainer:
         self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg)
         tweets = self.dm.generate_dataset(total_samples=self.FLAGS.total_samples)
         tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
+        self.missing_voc = gt.get_missing_voc()
+        print(sorted(self.missing_voc, key=self.missing_voc.__getitem__))
         self.training_set, self.testing_set = self.dm.split_and_shuffle(tweets_glove, ratio=self.FLAGS.ratio, seed=self.FLAGS.seed)
         self.__create_generators()
 
