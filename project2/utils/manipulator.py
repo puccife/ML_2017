@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 class DatasetManipulator:
 
@@ -6,13 +7,17 @@ class DatasetManipulator:
 
     positive_url = None
 
+    testing_url = None
+
+    testing_tweets = []
+
     tweets = []
 
 
-    def __init__(self, positive_url, negative_url):
+    def __init__(self, positive_url, negative_url, testing_url):
         self.positive_url = positive_url
         self.negative_url = negative_url
-
+        self.testing_url = testing_url
 
     def set_positive_url(self, positive_url):
         self.positive_url = positive_url
@@ -43,6 +48,88 @@ class DatasetManipulator:
         positive_tweets.close()
         return self.get_tweets()
 
+    def generate_testing_dataset(self):
+        loadedInstances = 0
+        if self.testing_url == None:
+            raise Exception('Testing dataset url not set')
+        testing_tweets = open(self.testing_url, "r")
+        self.testing_tweets = []
+        while loadedInstances < 10000:
+            raw_test = testing_tweets.readline()
+            raw_test = (raw_test.split(",", 1)[1])
+            print(raw_test)
+            self.testing_tweets.append((raw_test,0))
+            loadedInstances = loadedInstances+1
+        testing_tweets.close()
+        return self.testing_tweets
+
+    def _generate_dataset_babi(self, total_samples):
+        loadedInstances = 0
+        if self.positive_url == None or self.negative_url == None:
+            raise Exception('Dataset url not set')
+        negative_tweets = open(self.negative_url, "r")
+        positive_tweets = open(self.positive_url, "r")
+        self.tweets = []
+        while loadedInstances < total_samples/2:
+            raw_negative = negative_tweets.readline()
+            raw_positive = positive_tweets.readline()
+            self.tweets.append((raw_negative,0))
+            self.tweets.append((raw_positive,1))
+            loadedInstances = loadedInstances+1
+        negative_tweets.close()
+        positive_tweets.close()
+        return self.get_tweets()
+
+    def format_like_babi(self, reviews_to_format):
+        reviews_text_to_output = ""
+        s_index = 1
+        question = "What is the sentiment?"
+        for review in (reviews_to_format):
+            reviews_text_to_output += str(s_index) + ' ' + review[0]
+            # Add question to classify the current review like proposed in
+            #  Ask Me Anything: Dynamic Memory Networks for Natural Language Processing paper.
+            # http://proceedings.mlr.press/v48/kumar16.pdf
+            answer = str(review[1])
+            reviews_text_to_output += str(s_index + 1) + ' ' + question + '\t' + answer + '\t' + str(s_index) + '\n'
+        return reviews_text_to_output    
+
+    def save_reviews_splitted(self, reviews_train, reviews_test):
+        # Train
+        with (open("./data/tweet_train.txt", "w")) as rev_file_train:
+            rev_file_train.write(reviews_train)
+        # Test
+        with (open("./data/tweet_test.txt", "w")) as rev_file_train:
+            rev_file_train.write(reviews_test)
+
+    def init_babi(self, fname):
+        print("==> Loading test from %s" % fname)
+        tasks = []
+        task = None
+        for i, line in enumerate(open(fname)):
+            id = int(line[0:line.find(' ')])
+            print(id)
+            if id == 1:
+                task = {"C": "", "Q": "", "A": "", "S": ""}
+                counter = 0
+                id_map = {}
+            line = line.strip()
+            line = line.replace('.', ' . ')
+            line = line[line.find(' ') + 1:]
+            # if not a question
+            if line.find('?') == -1 or id == 1:
+                task["C"] += line
+                id_map[id] = counter
+                counter += 1
+            else:
+                idx = line.find('?')
+                tmp = line[idx + 1:].split('\t')
+                task["Q"] = line[:idx]
+                task["A"] = tmp[1].strip()
+                task["S"] = []
+                for num in tmp[2].split():
+                    task["S"].append(id_map[int(num.strip())])
+                tasks.append(task.copy())
+        return tasks
 
     def split_and_shuffle(self, tweets, ratio, seed):
         split_index = int(len(tweets)*ratio)
