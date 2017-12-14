@@ -64,7 +64,7 @@ class Config(object):
     clean_datasets = False
 
     # train_mode = False
-    train_mode = True
+    train_mode = False
     
     # Transfer Learning parameters
     fine_tuning_mode = False
@@ -384,7 +384,13 @@ class DMN_PLUS(object):
         qp, ip, ql, il, im, a, r = data
         if self.config.train_mode:
             p = np.random.permutation(len(data[0]))
-            qp, ip, ql, il, im, a, r = qp[p], ip[p], ql[p], il[p], im[p], a[p], r[p]
+            qp = qp[p]
+            ip = ip[p]
+            ql = ql[p]
+            il = il[p]
+            im = im[p]
+            a = a[p]
+            r = r[p]
 
         predictions = []
         for step in range(total_steps):
