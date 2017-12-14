@@ -1,0 +1,19 @@
+{
+  "hidden_size": "256",
+  "batch_size":"100",
+  "num_training_iterations": "900",
+  "num_testing_iterations": "100",
+  "num_epochs": "10",
+  "word_dimension" : "200",
+  "max_length" : "20",
+  "dataset_neg" : "./twitter-datasets/train_neg.txt",
+  "dataset_pos" : "./twitter-datasets/train_pos.txt",
+  "glove_dir" : "./glove.twitter.27B/",
+  "num_filters" : "128",
+  "seed" : "33",
+  "ratio": "0.9",
+  "num_classes": "2",
+  "total_samples": "1000",
+  "steps_per_epoch":"1800",
+  "validation_step":"200"
+}

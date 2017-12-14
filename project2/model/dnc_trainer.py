@@ -4,7 +4,7 @@ import random
 import math
 
 import tensorflow as tf
-
+import operator
 import dnc.dnc as dnc
 import dnc.access as access
 import dnc.addressing as addressing
@@ -25,7 +25,7 @@ class DNCTrainer:
 
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
-        self.__init_model()
+        #self.__init_model()
 
 
     def __init_model(self):
@@ -33,9 +33,15 @@ class DNCTrainer:
         word_embeddings = gt.generate_word_embeddings()
         self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg)
         tweets = self.dm.generate_dataset(total_samples=self.FLAGS.total_samples)
+
         tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
         self.missing_voc = gt.get_missing_voc()
-        print(sorted(self.missing_voc, key=self.missing_voc.__getitem__))
+        #print(sorted(self.missing_voc, key=self.missing_voc.__getitem__))
+        #print((self.missing_voc))
+        #self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
+        self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
+        self.sorted_d = sorted(self.d.items(), key=operator.itemgetter(1))
+        print(self.sorted_d)
         self.training_set, self.testing_set = self.dm.split_and_shuffle(tweets_glove, ratio=self.FLAGS.ratio, seed=self.FLAGS.seed)
         self.__create_generators()
 
@@ -55,8 +61,10 @@ class DNCTrainer:
         controller_config = {
           "hidden_size": self.FLAGS.hidden_size,
         }
+
         clip_value = self.FLAGS.clip_value
         #Creo la cella dnc
+
         dnc_core = dnc.DNC(access_config, controller_config, self.FLAGS.num_classes, clip_value)
         initial_state = dnc_core.initial_state(self.FLAGS.batch_size)
         #Funzione che ritorna una coppia (output,state), dove output in questo caso sara un tensore
