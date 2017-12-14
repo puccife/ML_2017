@@ -382,15 +382,15 @@ class DMN_PLUS(object):
         # shuffle data
        
         qp, ip, ql, il, im, a, r = data
-        if self.config.train_mode:
-            p = np.random.permutation(len(data[0]))
-            qp = qp[p]
-            ip = ip[p]
-            ql = ql[p]
-            il = il[p]
-            im = im[p]
-            a = a[p]
-            r = r[p]
+        #if self.config.train_mode:
+            #p = np.random.permutation(len(data[0]))
+            #qp = qp[p]
+            #ip = ip[p]
+            #ql = ql[p]
+            #il = il[p]
+            #im = im[p]
+            #a = a[p]
+            #r = r[p]
 
         predictions = []
         for step in range(total_steps):
