@@ -44,7 +44,7 @@ class GloveTrainer:
         return self.missing_voc
 
 
-    def process_word(self, word_embeddings, word, vocab, ivocab, word_size, to_return='wemb', silent=False):
+    def process_word(self, word_embeddings, word, vocab, ivocab, word_size, to_return='wemb', silent=True):
         if not word in word_embeddings:
             self.create_vector(word, word_embeddings, word_size, silent)
         if not word in vocab:
@@ -62,7 +62,7 @@ class GloveTrainer:
         vector = np.random.uniform(0.0, 1.0, (word_vector_size,))
         word2vec[word] = vector
         if not silent:
-            print("utils.py::create_vector => %s is missing" % word)
+            print("utils.py::create_vector missing word")
         return vector
 
     def process_input(self, data_raw, floatX, word2vec, vocab, ivocab, embed_size, split_sentences=False):
