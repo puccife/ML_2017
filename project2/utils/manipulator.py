@@ -35,8 +35,8 @@ class DatasetManipulator:
         loadedInstances = 0
         if self.positive_url == None or self.negative_url == None:
             raise Exception('Dataset url not set')
-        negative_tweets = open(self.negative_url, "r")
-        positive_tweets = open(self.positive_url, "r")
+        negative_tweets = open(self.negative_url, "r", encoding="utf-8", errors='ignore')
+        positive_tweets = open(self.positive_url, "r", encoding="utf-8", errors='ignore')
         self.tweets = []
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
@@ -52,7 +52,7 @@ class DatasetManipulator:
         loadedInstances = 0
         if self.testing_url == None:
             raise Exception('Testing dataset url not set')
-        testing_tweets = open(self.testing_url, "r")
+        testing_tweets = open(self.testing_url, "r", encoding="utf-8", errors='ignore')
         self.testing_tweets = []
         while loadedInstances < 10000:
             raw_test = testing_tweets.readline()
@@ -67,8 +67,8 @@ class DatasetManipulator:
         loadedInstances = 0
         if self.positive_url == None or self.negative_url == None:
             raise Exception('Dataset url not set')
-        negative_tweets = open(self.negative_url, "r")
-        positive_tweets = open(self.positive_url, "r")
+        negative_tweets = open(self.negative_url, "r", encoding="utf-8", errors='ignore')
+        positive_tweets = open(self.positive_url, "r", encoding="utf-8", errors='ignore')
         self.tweets = []
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
@@ -95,17 +95,17 @@ class DatasetManipulator:
 
     def save_reviews_splitted(self, reviews_train, reviews_test):
         # Train
-        with (open("./data/tweet_train.txt", "w")) as rev_file_train:
+        with (open("./data/tweet_train.txt", "w", encoding="utf-8", errors='ignore')) as rev_file_train:
             rev_file_train.write(reviews_train)
         # Test
-        with (open("./data/tweet_test.txt", "w")) as rev_file_train:
+        with (open("./data/tweet_test.txt", "w", encoding="utf-8", errors='ignore')) as rev_file_train:
             rev_file_train.write(reviews_test)
 
     def init_babi(self, fname):
         print("==> Loading test from %s" % fname)
         tasks = []
         task = None
-        for i, line in enumerate(open(fname)):
+        for i, line in enumerate(open(fname, encoding="utf-8", errors='ignore')):
             id = int(line[0:line.find(' ')])
             print(id)
             if id == 1:
