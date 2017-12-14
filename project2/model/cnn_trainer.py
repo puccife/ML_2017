@@ -123,7 +123,7 @@ class CNNTrainer:
         model_output = Dense(1, activation="sigmoid")(z)
 
         model = Model(model_input, model_output)
-        parallel_model = multi_gpu_model(model, gpus=1)
+        parallel_model = multi_gpu_model(model, gpus=2)
         parallel_model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
         parallel_model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2)
         model.save('my_test_model.h5')
