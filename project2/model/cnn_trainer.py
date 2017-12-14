@@ -9,8 +9,6 @@ import operator
 from utils.manipulator_cnn import DatasetManipulator_cnn
 from utils.pretrained_glove_cnn import GloveTrainer_cnn
 
-from keras.utils import multi_gpu_model
-
 import numpy as np
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
@@ -123,7 +121,7 @@ class CNNTrainer:
         model_output = Dense(1, activation="sigmoid")(z)
 
         model = Model(model_input, model_output)
-        parallel_model = multi_gpu_model(model, gpus=2)
-        parallel_model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-        parallel_model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2)
+        model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+        model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2)
         model.save('my_test_model.h5')
