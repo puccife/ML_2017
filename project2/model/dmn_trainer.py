@@ -117,7 +117,7 @@ class DMNTrainer:
         # TensorFlow GPU options
         tf_config = tf.ConfigProto()
         tf_config.gpu_options.allow_growth = True
-        tf_config.gpu_options.per_process_gpu_memory_fraction = 0.9
+        #tf_config.gpu_options.per_process_gpu_memory_fraction = 0.9
         best_overall_val_loss = float('inf')
         with tf.Session(config=tf_config) as session:
             sum_dir = 'summaries/train/' + time.strftime("%Y-%m-%d %H %M")
