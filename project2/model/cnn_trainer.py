@@ -13,7 +13,7 @@ import numpy as np
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
-from keras.layers import LSTM
+from keras.layers import GRU
 from keras.models import Model
 from keras.layers.merge import Concatenate
 from keras.preprocessing import sequence
