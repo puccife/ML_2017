@@ -31,9 +31,9 @@ class DatasetManipulator_cnn:
     def load_data_and_labels(self):
 
         # Load data from files
-        positive_examples = list(open(self.positive_url).readlines())
+        positive_examples = list(open(self.positive_url, encoding="utf-8", errors='ignore').readlines())
         positive_examples = [s.strip() for s in positive_examples]
-        negative_examples = list(open(self.negative_url).readlines())
+        negative_examples = list(open(self.negative_url, encoding="utf-8", errors='ignore').readlines())
         negative_examples = [s.strip() for s in negative_examples]
         # Split by words
         x_text = positive_examples + negative_examples
