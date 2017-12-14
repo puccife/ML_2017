@@ -110,7 +110,7 @@ class CNNTrainer:
                                  activation="relu",
                                  strides=1)(z)
             conv = MaxPooling1D(pool_size=2)(conv)
-            conv = LSTM(128)(conv)
+            conv = GRU(256)(conv)
             #conv = Flatten()(conv)
             conv_blocks.append(conv)
 
@@ -121,7 +121,7 @@ class CNNTrainer:
         model_output = Dense(1, activation="sigmoid")(z)
 
         model = Model(model_input, model_output)
-        model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer="nadam", metrics=["accuracy"])
 
-        model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2)
+        model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2, workers=4, use_multiprocessing=True)
         model.save('my_test_model.h5')
