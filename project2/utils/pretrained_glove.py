@@ -14,7 +14,7 @@ class GloveTrainer:
 
     def generate_word_embeddings(self):
         print('Indexing word vectors.')
-        f = open(os.path.join(self.GLOVE_DIR, 'glove.twitter.27B.'+str(self.vector_size)+'d.txt'))
+        f = open('./glove.twitter.27B.'+str(self.vector_size)+'d.txt')
         for line in f:
             values = line.split()
             word = values[0]
