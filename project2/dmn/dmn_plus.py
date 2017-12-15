@@ -11,13 +11,12 @@ from dmn.attention_gru_cell import AttentionGRUCell
 class Config(object):
     """Holds model hyperparams and data information."""
 
-    num_examples = 2000
-    # num_examples = 1000000
+    num_examples = 2000000
     embed_size = 100
     num_classes = 2
     batch_size = 100
     hidden_size = 128
-    max_epochs = 5
+    max_epochs = 6
     early_stopping = 3
     dropout = 0.9
     lr = 0.001
