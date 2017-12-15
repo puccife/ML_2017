@@ -123,5 +123,5 @@ class CNNTrainer:
         model = Model(model_input, model_output)
         model.compile(loss="binary_crossentropy", optimizer="nadam", metrics=["accuracy"])
 
-        model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2, workers=4, use_multiprocessing=True)
+        model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2)
         model.save('my_test_model.h5')
