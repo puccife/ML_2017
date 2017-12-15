@@ -60,7 +60,7 @@ class DMNTrainer:
         else:
             max_mask_len = max_sen_len
         q_lens = gt.get_lens(questions)
-        print("The max sequence lenght found is " + str(np.(input_lens)))
+        print("The max sequence lenght found is " + str(np.max(input_lens)))
         max_q_len = np.max(q_lens)
         max_input_len = min(np.max(input_lens), config.max_allowed_inputs)
 
