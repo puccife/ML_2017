@@ -119,12 +119,7 @@ class GloveTrainer:
             # NOTE: here we assume the answer is one word!
 
             if not split_sentences:
-                if input_mask_mode == 'word':
-                    input_masks.append(np.array([index for index, w in enumerate(inp)], dtype=np.int32))
-                elif input_mask_mode == 'sentence':
-                    input_masks.append(np.array([index for index, w in enumerate(inp) if w == '.'], dtype=np.int32))
-                else:
-                    raise Exception("invalid input_mask_mode")
+                input_masks.append(np.array([index for index, w in enumerate(inp) if w == '.'], dtype=np.int32))
 
             relevant_labels.append(x["S"])
 

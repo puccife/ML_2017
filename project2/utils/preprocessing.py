@@ -296,6 +296,5 @@ def clean_tweets(tweet):
     tweet = tweet.lower()
     tweet = clean_str(tweet)
     tweet_tokenized = list(gensim.utils.tokenize(tweet))
-    #tweet_corrected = [spell(words) for words in tweet_tokenized]
     tweet = ' '.join(tweet_tokenized)
     return tweet

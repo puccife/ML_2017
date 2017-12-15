@@ -66,23 +66,6 @@ class DatasetManipulator:
         testing_tweets.close()
         return self.testing_tweets
 
-    def _generate_dataset_babi(self, total_samples):
-        loadedInstances = 0
-        if self.positive_url == None or self.negative_url == None:
-            raise Exception('Dataset url not set')
-        negative_tweets = open(self.negative_url, "r", encoding="utf-8", errors='ignore')
-        positive_tweets = open(self.positive_url, "r", encoding="utf-8", errors='ignore')
-        self.tweets = []
-        while loadedInstances < total_samples/2:
-            raw_negative = negative_tweets.readline()
-            raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,0))
-            self.tweets.append((raw_positive,1))
-            loadedInstances = loadedInstances+1
-        negative_tweets.close()
-        positive_tweets.close()
-        return self.get_tweets()
-
     def format_like_babi(self, reviews_to_format):
         reviews_text_to_output = ""
         s_index = 1
