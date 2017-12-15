@@ -12,7 +12,7 @@ class Config(object):
     """Holds model hyperparams and data information."""
 
     num_examples = 2000000
-    embed_size = 25
+    embed_size = 200
     num_classes = 2
     batch_size = 100
     hidden_size = 128
