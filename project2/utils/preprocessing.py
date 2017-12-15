@@ -160,7 +160,7 @@ contractions_dict = {
     "wahhh":"wow",
     "#cantsayno":"can not say no",
     "loveee":"love",
-    "yayyy":"",
+    "yayyy":"approval",
     "heyyy":"hey",
     "omggg":"oh my god",
     "#ifindthatattractive":"i find that attractive",
@@ -170,7 +170,7 @@ contractions_dict = {
     "#fcblive":"football club barcelona live",
     "knowww":"know",
     "#harrypotterchatuplines":"harry potter chat up lines",
-    "waaa":"",
+    "waaa":"greeting",
     "misss":"miss",
     "thanksss":"thanks",
     "ya'll":"you all",
@@ -265,8 +265,8 @@ contractions_dict = {
     "#happybirthday":"happy birthday",
     "#soproud":"so proud",
     "#lovinglife":"loving life",
-    "#thuglife":"thug life"
-
+    "#thuglife":"thug life",
+    "didnt":"did not",
      }
 contractions_re = re.compile('(%s)' % '|'.join(contractions_dict.keys()))
 
@@ -293,6 +293,7 @@ def clean_tweets(tweet):
     tweet= tweet.translate(remove_digits)
     tweet= tweet.lower()
     tweet= expand_contractions(tweet)
+    tweet = tweet.lower()
     tweet = clean_str(tweet)
     tweet_tokenized = list(gensim.utils.tokenize(tweet))
     #tweet_corrected = [spell(words) for words in tweet_tokenized]

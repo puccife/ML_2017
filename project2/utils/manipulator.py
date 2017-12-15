@@ -1,5 +1,6 @@
 import numpy as np
 import re
+from utils.preprocessing import clean_tweets
 
 class DatasetManipulator:
 
@@ -41,8 +42,10 @@ class DatasetManipulator:
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
             raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,0))
-            self.tweets.append((raw_positive,1))
+            clean_negative = clean_tweets(raw_negative)
+            clean_positive = clean_tweets(raw_positive)
+            self.tweets.append((clean_negative,0))
+            self.tweets.append((clean_positive,1))
             loadedInstances = loadedInstances+1
         negative_tweets.close()
         positive_tweets.close()
@@ -57,8 +60,8 @@ class DatasetManipulator:
         while loadedInstances < 10000:
             raw_test = testing_tweets.readline()
             raw_test = (raw_test.split(",", 1)[1])
-            print(raw_test)
-            self.testing_tweets.append((raw_test,0))
+            clean_test = clean_tweets(raw_test)
+            self.testing_tweets.append((clean_test,0))
             loadedInstances = loadedInstances+1
         testing_tweets.close()
         return self.testing_tweets
@@ -107,7 +110,6 @@ class DatasetManipulator:
         task = None
         for i, line in enumerate(open(fname, encoding="utf-8", errors='ignore')):
             id = int(line[0:line.find(' ')])
-            print(id)
             if id == 1:
                 task = {"C": "", "Q": "", "A": "", "S": ""}
                 counter = 0

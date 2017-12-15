@@ -11,12 +11,12 @@ from dmn.attention_gru_cell import AttentionGRUCell
 class Config(object):
     """Holds model hyperparams and data information."""
 
-    num_examples = 2000000
+    num_examples = 2000
     # num_examples = 1000000
-    embed_size = 50
+    embed_size = 100
     num_classes = 2
     batch_size = 100
-    hidden_size = 64
+    hidden_size = 128
     max_epochs = 5
     early_stopping = 3
     dropout = 0.9
@@ -39,7 +39,7 @@ class Config(object):
     anneal_by = 1.5
 
     num_hops = 3
-    num_attention_features = 4
+    num_attention_features = 6
 
     max_allowed_inputs = 20
     # Added in order to sample different parts of the dataset
