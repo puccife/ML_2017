@@ -88,7 +88,7 @@ class DatasetManipulator:
         s_index = 1
         question = "What is the sentiment?"
         for review in (reviews_to_format):
-            reviews_text_to_output += str(s_index) + ' ' + review[0]
+            reviews_text_to_output += str(s_index) + ' ' + review[0] + '\n'
             # Add question to classify the current review like proposed in
             #  Ask Me Anything: Dynamic Memory Networks for Natural Language Processing paper.
             # http://proceedings.mlr.press/v48/kumar16.pdf

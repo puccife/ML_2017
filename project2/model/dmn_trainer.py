@@ -40,31 +40,18 @@ class DMNTrainer:
         self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg, self.FLAGS.dataset_test)
         self.training_set = self.dm.generate_dataset(total_samples=config.num_examples)
         self.testing_set = self.dm.generate_testing_dataset()
-        # ------------------------- ADDED MOTHERFUCKER ------------------------- 
-        # self.training_set, self.testing_set = self.dm.split_and_shuffle(tweets, ratio=config.training_ratio, seed=config.seed)
-
-        # aaddedd
         print(len(self.training_set))
-
         training = self.dm.format_like_babi(self.training_set)
         testing = self.dm.format_like_babi(self.testing_set)
         self.dm.save_reviews_splitted(training, testing)
         train_raw = self.dm.init_babi('./data/tweet_train.txt')
         test_raw = self.dm.init_babi('./data/tweet_test.txt')
-        # ------------------------- ADDED MOTHERFUCKER -------------------------
         gt.process_word(word_embeddings=self.word_embeddings, word="<eos>", vocab=self.vocab,
                         ivocab=self.ivocab, word_size=config.embed_size, to_return="index")
-        # # --------------------
         train_data = gt.process_input(train_raw.copy(), config.floatX, self.word_embeddings, self.vocab, self.ivocab, config.embed_size, True)
         test_data = gt.process_input(test_raw.copy(), config.floatX, self.word_embeddings, self.vocab, self.ivocab, config.embed_size, True)
-
-        # if config.train_mode:
         word_embedding = gt.create_embedding(self.word_embeddings, self.ivocab, config.embed_size)
         save_embedding(word_embedding)
-        #else:
-            # print("Loading pretrained embedding")
-            # word_embedding = load_embedding()
-
         inputs, questions, answers, input_masks, rel_labels = train_data if config.train_mode else test_data
         input_lens, sen_lens, max_sen_len = gt.get_sentence_lens(inputs)
         if config.fine_tuning_mode and config.y_info is not None:
