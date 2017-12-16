@@ -1,21 +1,54 @@
 import time
 import json
+import random
+import math
 
 import tensorflow as tf
-
+import operator
 import dnc.dnc as dnc
 import dnc.access as access
 import dnc.addressing as addressing
 
+from utils.manipulator import DatasetManipulator
+from utils.pretrained_glove import GloveTrainer
+from utils.memory_manager import memory_usage
 
 class DNCTrainer:
 
     FLAGS = None
-
+    training_generator = None
+    testing_generator = None
+    dm = None
+    training_set = None
+    testing_set = None
+    missing_voc = None
 
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
+        #self.__init_model()
 
+
+    def __init_model(self):
+        gt = GloveTrainer(vector_size=self.FLAGS.word_dimension, glove_dir=self.FLAGS.glove_dir)
+        word_embeddings = gt.generate_word_embeddings()
+        self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg)
+        tweets = self.dm.generate_dataset(total_samples=self.FLAGS.total_samples)
+
+        tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
+        self.missing_voc = gt.get_missing_voc()
+        #print(sorted(self.missing_voc, key=self.missing_voc.__getitem__))
+        #print((self.missing_voc))
+        #self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
+        self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
+        self.sorted_d = sorted(self.d.items(), key=operator.itemgetter(1))
+        print(self.sorted_d)
+        self.training_set, self.testing_set = self.dm.split_and_shuffle(tweets_glove, ratio=self.FLAGS.ratio, seed=self.FLAGS.seed)
+        self.__create_generators()
+
+
+    def __create_generators(self):
+        self.training_generator = self.dm.get_generator(self.training_set, self.FLAGS)
+        self.testing_generator = self.dm.get_generator(self.testing_set, self.FLAGS)
 
     def run_model(self, input_sequence):
         print("Running model")
@@ -28,8 +61,10 @@ class DNCTrainer:
         controller_config = {
           "hidden_size": self.FLAGS.hidden_size,
         }
+
         clip_value = self.FLAGS.clip_value
         #Creo la cella dnc
+
         dnc_core = dnc.DNC(access_config, controller_config, self.FLAGS.num_classes, clip_value)
         initial_state = dnc_core.initial_state(self.FLAGS.batch_size)
         #Funzione che ritorna una coppia (output,state), dove output in questo caso sara un tensore
@@ -131,31 +166,11 @@ class DNCTrainer:
         config = tf.ConfigProto()
         config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
-        print("finished")
-        return
         with tf.train.SingularMonitoredSession(
             hooks=hooks, checkpoint_dir=self.FLAGS.checkpoint_dir,config=config) as sess:
-
-          #Il numero di istanze di training  e testing viene diviso per due perche' indica che il numero di recensioni
-          # positive e negative siano uguali
-          if self.FLAGS.num_classes ==5:
-              numTraining = (self.FLAGS.num_training_iterations )
-              numTesting = (self.FLAGS.num_testing_iterations )
-              allLines = getCrossDomainReviewsAndOverall(numTraining,numTesting,self.FLAGS.dataset, self.FLAGS.datasetDest, self.FLAGS.max_lenght, self.FLAGS.random, self.FLAGS.seed)
-          elif self.FLAGS.num_classes ==2:
-              numTraining = (self.FLAGS.num_training_iterations // 2)
-              numTesting = (self.FLAGS.num_testing_iterations // 2)
-              #Vengono ottenute tutte le recensioni necessarie per training e testing
-              allLines = getCrossDomainReviewsAndOverall(numTraining, numTesting,
-                                                         self.FLAGS.dataset, self.FLAGS.datasetDest, self.FLAGS.max_lenght, self.FLAGS.random,
-                                                         self.FLAGS.seed)
-
           #Viene inizializzato un generatore attraverso il quale ottenere mano a mano i vari batch di training e testing,
-          # viene inoltre indicato quale modello word2vec debba essere utilizzato
-          generator = balancedGetDataset(allLines,self.FLAGS.w2v_model,self.FLAGS)
-
           #Viene ottenuto un primo batch per compiere il passo di inizializzazione della rete
-          datasetTrain = next(generator)
+          datasetTrain = next(self.training_generator)
 
           #Variabile per indicare che il passo di inizializzazione e' stato appena compiuto
           glob = True
@@ -179,7 +194,8 @@ class DNCTrainer:
           for epochs in range(self.FLAGS.num_epochs):
               #Se il passo di inizializzazione e' stato appena fatto ho gia' il generatore, altrimenti lo devo ri-ottenere
               if not glob:
-                  generator = balancedGetDataset(allLines,self.FLAGS.w2v_model,self.FLAGS)
+                  self.__create_generators()
+                  print("Epoch " + str(epochs))
               if self.FLAGS.num_epochs > 1 :
                   start_iteration = 0
 
@@ -196,17 +212,16 @@ class DNCTrainer:
                   newLearningRate = self.FLAGS.final_learning_rate
 
               date = time.strftime("%H:%M:%S")
-              tf.logging.info("Memory usage %f Mb",memory_usage()['rss']/1000)
+              # tf.logging.info("Memory usage %f Mb",memory_usage()['rss']/1000)
               tf.logging.info("Ora: %s Epoca %d, Learning rate: %f\n",date,epochs,newLearningRate)
               info1 = '\nOra: '+date+', Epoca '+str(epochs)+ ', Learning rate: '+str(newLearningRate)
               outputFile.write(info1)
               #################################################TRAINING########################################################
-              for train_iteration in range(start_iteration, (num_training_iterations//self.FLAGS.batch_size)):
+              for train_iteration in range(start_iteration, (self.FLAGS.num_training_iterations//self.FLAGS.batch_size)):
                   if glob:
                       glob = False
                   else:
-                      datasetTrain = next(generator)
-
+                      datasetTrain = next(self.training_generator)
                   #Viene compiuto un passo di training
                   _, act_accuracy, entropy = sess.run([train_step, accuracy, total_error],
                                                       {x: (datasetTrain[0]),
@@ -233,13 +248,12 @@ class DNCTrainer:
                   train_accuracy += act_accuracy
 
                   #Ogni certo intervallo vengono riportate le informazioni relative al training
-                  if (train_iteration + 1) % report_interval == 0:
-
+                  if (train_iteration + 1) % self.FLAGS.report_interval == 0:
                       date = time.strftime("%H:%M:%S")
-                      tf.logging.info("Ora: %s ,%d: Avg training accuracy %f.\nAvg Cross entropy: %f\n",
-                                      date,train_iteration+1, total_accuracy / report_interval, total_entropy / report_interval)
-                      info2 = "\nOra: "+date+" "+str(train_iteration+1)+": Avg training accuracy: "+str(total_accuracy / report_interval)+\
-                              "\nAvg Cross entropy: "+str(total_entropy / report_interval)+"\n"
+                      tf.logging.info("Time: %s ,%d: Avg training accuracy %f.\nAvg Cross entropy: %f\n",
+                                      date,train_iteration+1, total_accuracy / self.FLAGS.report_interval, total_entropy / self.FLAGS.report_interval)
+                      info2 = "\Time: "+date+" "+str(train_iteration+1)+": Avg training accuracy: "+str(total_accuracy / self.FLAGS.report_interval)+\
+                              "\nAvg Cross entropy: "+str(total_entropy / self.FLAGS.report_interval)+"\n"
                       outputFile.write(info2)
                       total_accuracy = 0
                       total_entropy = 0
@@ -250,7 +264,7 @@ class DNCTrainer:
 
               info3 = "\nEpoch: "+str(epochs)+",Iteration: "+str(train_iteration+1)+", Average Training accuracy: "+str(train_accuracy / (train_iteration+1))+"\n"
               outputFile.write(info3)
-              tf.logging.info("Memory usage %f Mb",memory_usage()['rss']/1000)
+              # tf.logging.info("Memory usage %f Mb",memory_usage()['rss']/1000)
 
               epoch_train_accuracy = train_accuracy / (train_iteration+1)
 
@@ -263,19 +277,19 @@ class DNCTrainer:
 
               #################################################TESTING########################################################
               for test_iteration in range(0,(self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)):
-                  datasetTest = next(generator)
+                  datasetTest = next(self.testing_generator)
                   act_accuracy = sess.run(accuracy,
                                           {x: datasetTest[0],
                                            y_: datasetTest[1],
                                            mask: datasetTest[2]})
                   test_accuracy += act_accuracy
                   total_test_accuracy += act_accuracy
-                  if (test_iteration + 1) % report_interval == 0:
+                  if (test_iteration + 1) % self.FLAGS.report_interval == 0:
 
                       tf.logging.info("%d: Avg testing accuracy %f.\n",
-                                      test_iteration+1, test_accuracy / report_interval
+                                      test_iteration+1, test_accuracy / self.FLAGS.report_interval
                                       )
-                      info4 = str(test_iteration+1)+ ": Avg testing accuracy: "+str(test_accuracy / report_interval)+"\n"
+                      info4 = str(test_iteration+1)+ ": Avg testing accuracy: "+str(test_accuracy / self.FLAGS.report_interval)+"\n"
                       outputFile.write(info4)
                       test_accuracy = 0
               tf.logging.info("Epoch: %d,Iteration: %d, Average Testing accuracy: %f\n",epochs, test_iteration+1,
@@ -283,7 +297,7 @@ class DNCTrainer:
               info5 = "Epoch: "+str(epochs)+",Iteration: "+ str(test_iteration+1)+", Average Testing accuracy: "+str(total_test_accuracy /( self.FLAGS.num_testing_iterations//self.FLAGS.batch_size))+"\n"
               outputFile.write(info5)
 
-              epoch_test_accuracy = total_test_accuracy /( self.FLAGS.num_testing_iterations//FLAGS.batch_size)
+              epoch_test_accuracy = total_test_accuracy /( self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)
               if epoch_test_accuracy > best_test_accuracy:
                   best_test_accuracy = epoch_test_accuracy
 

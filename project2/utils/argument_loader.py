@@ -25,6 +25,7 @@ class ArgumentLoader:
                                   "Epsilon used for RMSProp optimizer.")
             tf.flags.DEFINE_string("dataset_neg",configuration["dataset_neg"],"Dataset of negative tweets.")
             tf.flags.DEFINE_string("dataset_pos",configuration["dataset_pos"],"Dataset of positive tweets.")
+            tf.flags.DEFINE_string("dataset_test",configuration["dataset_test"],"Dataset of testing tweets.")
             tf.flags.DEFINE_string("glove_dir", configuration["glove_dir"], "The location of GloVe pretrained model.")
             tf.flags.DEFINE_boolean("random", configuration["random"], "True if you want to randomized the rewiew to choose")
             tf.flags.DEFINE_boolean("seed", int(configuration["seed"]), "The seed that you want to set")
