@@ -135,4 +135,4 @@ class CNNTrainer:
 
 
         model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2,callbacks=callbacks_list)
-        model.save('my_test_model.h5')
+        #model.save('my_test_model.h5')
