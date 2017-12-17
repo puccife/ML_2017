@@ -17,7 +17,7 @@ FLAGS = al.get_configuration()
 def main(args):
     dmn_trainer, config, model, init, saver = load_prerequisites()
     results = predict(saver, init, model, config, dmn_trainer)
-    create_prediction("epoch0", results)
+    create_prediction("epoch1", results)
 
 def load_prerequisites():
     dmn_trainer = DMNTrainer(FLAGS)
@@ -32,7 +32,7 @@ def predict(saver, init, model, config, dmn_trainer):
         session.run(init)
 
         print('==> restoring weights')
-        saver.restore(session, 'weights/task' + str(model.config.babi_id) + 'epocha0.weights')
+        saver.restore(session, 'weights/task' + str(model.config.babi_id) + 'epocha1.weights')
 
         print('==> running DMN')
         predictions = model.run_epoch(session, model.test)
