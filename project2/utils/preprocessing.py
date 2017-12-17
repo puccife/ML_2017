@@ -2,6 +2,7 @@ import re
 from string import digits
 from autocorrect import spell
 import gensim
+from nltk.corpus import stopwords
 
 contractions_dict = {
     "<user>":"",
@@ -270,10 +271,23 @@ contractions_dict = {
      }
 contractions_re = re.compile('(%s)' % '|'.join(contractions_dict.keys()))
 
+## Initialize Stopwords
+stopWords = stopwords.words("english")
+## Remove words that denote sentiment
+for w in ['no', 'not', 'nor', 'only', 'against', 'up', 'down', 'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ain', 'aren', 'mightn', 'mustn', 'needn', 'shouldn', 'wasn', 'weren', 'wouldn']:
+    stopWords.remove(w)
+
 def expand_contractions(s, contractions_dict=contractions_dict):
     def replace(match):
         return contractions_dict[match.group(0)]
     return contractions_re.sub(replace, s)
+
+def remove_stopwords_from_tweet(tweet):
+    tokens = tweet.split()
+    for word in tokens:
+        if word in stopWords:
+            tokens.remove(word)
+    return ' '.join(tokens)
 
 def clean_str(string):
 
@@ -297,4 +311,5 @@ def clean_tweets(tweet):
     tweet = clean_str(tweet)
     tweet_tokenized = list(gensim.utils.tokenize(tweet))
     tweet = ' '.join(tweet_tokenized)
+    tweet = remove_stopwords_from_tweet(tweet)
     return tweet
