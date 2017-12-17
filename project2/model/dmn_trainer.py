@@ -141,7 +141,7 @@ class DMNTrainer:
                             print('Saving weights')
                             best_overall_val_loss = best_val_loss
                             best_val_accuracy = valid_accuracy
-                            saver.save(session, 'weights/task' + str(model.config.babi_id) +'epocha'+ str(epoch)+'.weights')
+                            saver.save(session, 'weights/task' + str(model.config.babi_id) +'.weights')
                 
             print('Total time: {}'.format(time.time() - start))
 
