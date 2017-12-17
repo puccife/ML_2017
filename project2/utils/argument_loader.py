@@ -8,6 +8,10 @@ config_json = 'configuration.json'
 class ArgumentLoader:
 
     def get_configuration(self):
+        """
+        Function used to read the configuration file and create the tf.FLAGS 
+        :return: FLAGS with properties used for training.
+        """
         FLAGS = tf.flags.FLAGS
         with open(os.path.join(CONFIG_DIR, config_json)) as data_file:
             configuration = json.load(data_file)

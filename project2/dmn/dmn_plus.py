@@ -10,7 +10,6 @@ from dmn.attention_gru_cell import AttentionGRUCell
 
 class Config(object):
     """Holds model hyperparams and data information."""
-
     num_examples = 2000000
     embed_size = 200
     num_classes = 2
@@ -360,6 +359,17 @@ class DMN_PLUS(object):
         return output
 
     def run_epoch(self, session, data, num_epoch=0, train_writer=None, train_op=None, verbose=2, train=False):
+        """
+        Function used to run one epoch of training or predict from the test set
+        :param session: tensorflow session
+        :param data: data 
+        :param num_epoch: specified in the configuration file
+        :param train_writer: log writer for tensorboard
+        :param train_op: training operation
+        :param verbose: verbose output description
+        :param train: training flag - not used - get the flag from the configuration file
+        :return: the results of training or testing
+        """
         config = self.config
         dp = config.dropout
         if train_op is None:
@@ -379,8 +389,9 @@ class DMN_PLUS(object):
         accuracy = 0
 
         # shuffle data
-       
         qp, ip, ql, il, im, a, r = data
+
+        # Shuffling can cause MemoryError
         #if self.config.train_mode:
             #p = np.random.permutation(len(data[0]))
             #qp = qp[p]
@@ -430,6 +441,11 @@ class DMN_PLUS(object):
         return np.mean(total_loss), accuracy / float(total_steps)
 
     def __init__(self, config, dmn_trainer):
+        """
+        Initializing dmn network
+        :param config: configuration file loaded
+        :param dmn_trainer: dmn trainer that trains the network.
+        """
         self.dmn_trainer = dmn_trainer
         self.config = config
         self.variables_to_save = {}
