@@ -15,7 +15,7 @@ from tflearn.data_utils import to_categorical, pad_sequences
 ########################################
 DATA_DIR = 'data\\'
 GLOVE_DIR = 'glove\\'
-EMBEDDING_DIM = 100
+EMBEDDING_DIM = 200
 MODEL_NAME = 'lstm_256_dropout_0-5_biggest_datasetT&G_adam.tflearn'
 MODEL_PATH = os.path.join('models', MODEL_NAME)
 EMBEDDING_FILE = GLOVE_DIR + 'glove.twitter.27B.' + str(EMBEDDING_DIM) + 'd.txt'
@@ -219,7 +219,7 @@ net = tflearn.regression(net, optimizer='adam', loss='categorical_crossentropy')
 model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
 embeddingsLayer = tflearn.get_layer_variables_by_name('embeddingLayer')[0]
 model.set_weights(embeddingsLayer, embedding_matrix)
-model.fit(x_train, y_train, validation_set=(x_val, y_val), n_epoch=30,
+model.fit(x_train, y_train, validation_set=(x_val, y_val), n_epoch=10,
           show_metric=True, batch_size=256, shuffle=True)
 model.save(MODEL_PATH)
 print('Training done!')
