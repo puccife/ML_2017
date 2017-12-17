@@ -9,16 +9,12 @@ import operator
 from utils.manipulator_cnn import DatasetManipulator_cnn
 from utils.pretrained_glove_cnn import GloveTrainer_cnn
 from keras.callbacks import ModelCheckpoint
-
+from keras.callbacks import TensorBoard
 import numpy as np
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
-<<<<<<< HEAD
 from keras.layers import GRU, LSTM
-=======
-from keras.layers import GRU
->>>>>>> d18d4322ac12620bd808ddd8f3465298fcdeb92d
 from keras.models import Model
 from keras.layers.merge import Concatenate
 from keras.preprocessing import sequence
@@ -99,7 +95,7 @@ class CNNTrainer:
         print("Running model")
 
         dropout_prob = (0.1, 0.5)
-        filter_sizes = (3,5,3,3,5,3,3)
+        filter_sizes = (3,3,3,3,3,3,3)
 
         input_shape = (self.FLAGS.max_length, self.FLAGS.word_dimension)
         model_input = Input(shape=input_shape)
@@ -116,12 +112,7 @@ class CNNTrainer:
                                  strides=1)(z)
 
             conv = MaxPooling1D(pool_size=2)(conv)
-<<<<<<< HEAD
             conv = LSTM(128)(conv)
-
-=======
-            conv = GRU(256)(conv)
->>>>>>> d18d4322ac12620bd808ddd8f3465298fcdeb92d
             #conv = Flatten()(conv)
             conv_blocks.append(conv)
 
@@ -132,12 +123,16 @@ class CNNTrainer:
         model_output = Dense(1, activation="sigmoid")(z)
 
         model = Model(model_input, model_output)
-        model.compile(loss="binary_crossentropy", optimizer="nadam", metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
         # checkpoint
         filepath="best_weights.hdf5"
         checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-        callbacks_list = [checkpoint]
+        tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
+
+        callbacks_list = [checkpoint, tbCallBack]
+
+
 
         model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2,callbacks=callbacks_list)
         model.save('my_test_model.h5')
