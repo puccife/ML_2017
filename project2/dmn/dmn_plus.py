@@ -12,18 +12,17 @@ class Config(object):
     """Holds model hyperparams and data information."""
 
     num_examples = 2000000
-    # num_examples = 1000000
-    embed_size = 50
+    embed_size = 200
     num_classes = 2
-    batch_size = 100
-    hidden_size = 64
+    batch_size = 50
+    hidden_size = 128
     max_epochs = 5
     early_stopping = 3
     dropout = 0.9
     lr = 0.001
     l2 = 0.001
     cap_grads = False
-    max_grad_val = 10
+    max_grad_val = 15
     noisy_grads = False
 
     # Initialize word embeddings with GloVe or Google vectors, can be "google" or "glove"
@@ -39,9 +38,9 @@ class Config(object):
     anneal_by = 1.5
 
     num_hops = 3
-    num_attention_features = 4
+    num_attention_features = 6
 
-    max_allowed_inputs = 20
+    max_allowed_inputs = 23
     # Added in order to sample different parts of the dataset
     sampling_offset_factor = 1
     # If not None, it is used to balance the polarity of training samples in 2 classes case

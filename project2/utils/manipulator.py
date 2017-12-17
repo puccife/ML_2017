@@ -1,5 +1,6 @@
 import numpy as np
 import re
+from utils.preprocessing import clean_tweets
 
 class DatasetManipulator:
 
@@ -41,8 +42,10 @@ class DatasetManipulator:
         while loadedInstances < total_samples/2:
             raw_negative = negative_tweets.readline()
             raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,0))
-            self.tweets.append((raw_positive,1))
+            clean_negative = clean_tweets(raw_negative)
+            clean_positive = clean_tweets(raw_positive)
+            self.tweets.append((clean_negative,0))
+            self.tweets.append((clean_positive,1))
             loadedInstances = loadedInstances+1
         negative_tweets.close()
         positive_tweets.close()
@@ -57,35 +60,18 @@ class DatasetManipulator:
         while loadedInstances < 10000:
             raw_test = testing_tweets.readline()
             raw_test = (raw_test.split(",", 1)[1])
-            print(raw_test)
-            self.testing_tweets.append((raw_test,0))
+            clean_test = clean_tweets(raw_test)
+            self.testing_tweets.append((clean_test,0))
             loadedInstances = loadedInstances+1
         testing_tweets.close()
         return self.testing_tweets
-
-    def _generate_dataset_babi(self, total_samples):
-        loadedInstances = 0
-        if self.positive_url == None or self.negative_url == None:
-            raise Exception('Dataset url not set')
-        negative_tweets = open(self.negative_url, "r", encoding="utf-8", errors='ignore')
-        positive_tweets = open(self.positive_url, "r", encoding="utf-8", errors='ignore')
-        self.tweets = []
-        while loadedInstances < total_samples/2:
-            raw_negative = negative_tweets.readline()
-            raw_positive = positive_tweets.readline()
-            self.tweets.append((raw_negative,0))
-            self.tweets.append((raw_positive,1))
-            loadedInstances = loadedInstances+1
-        negative_tweets.close()
-        positive_tweets.close()
-        return self.get_tweets()
 
     def format_like_babi(self, reviews_to_format):
         reviews_text_to_output = ""
         s_index = 1
         question = "What is the sentiment?"
         for review in (reviews_to_format):
-            reviews_text_to_output += str(s_index) + ' ' + review[0]
+            reviews_text_to_output += str(s_index) + ' ' + review[0] + '\n'
             # Add question to classify the current review like proposed in
             #  Ask Me Anything: Dynamic Memory Networks for Natural Language Processing paper.
             # http://proceedings.mlr.press/v48/kumar16.pdf
@@ -107,7 +93,6 @@ class DatasetManipulator:
         task = None
         for i, line in enumerate(open(fname, encoding="utf-8", errors='ignore')):
             id = int(line[0:line.find(' ')])
-            print(id)
             if id == 1:
                 task = {"C": "", "Q": "", "A": "", "S": ""}
                 counter = 0

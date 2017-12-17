@@ -14,7 +14,11 @@ import numpy as np
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
+<<<<<<< HEAD
 from keras.layers import GRU, LSTM
+=======
+from keras.layers import GRU
+>>>>>>> d18d4322ac12620bd808ddd8f3465298fcdeb92d
 from keras.models import Model
 from keras.layers.merge import Concatenate
 from keras.preprocessing import sequence
@@ -112,8 +116,12 @@ class CNNTrainer:
                                  strides=1)(z)
 
             conv = MaxPooling1D(pool_size=2)(conv)
+<<<<<<< HEAD
             conv = LSTM(128)(conv)
 
+=======
+            conv = GRU(256)(conv)
+>>>>>>> d18d4322ac12620bd808ddd8f3465298fcdeb92d
             #conv = Flatten()(conv)
             conv_blocks.append(conv)
 
@@ -124,7 +132,7 @@ class CNNTrainer:
         model_output = Dense(1, activation="sigmoid")(z)
 
         model = Model(model_input, model_output)
-        model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer="nadam", metrics=["accuracy"])
 
         # checkpoint
         filepath="best_weights.hdf5"

@@ -14,7 +14,7 @@ class GloveTrainer:
 
     def generate_word_embeddings(self):
         print('Indexing word vectors.')
-        f = open('./glove.twitter.27B/glove.twitter.27B.'+str(self.vector_size)+'d.txt', encoding="utf-8")
+        f = open('./glove.twitter.27B/glove.twitter.27B.'+str(self.vector_size)+'d.txt', encoding="utf-8", errors='ignore')
         for line in f:
             values = line.split()
             word = values[0]
@@ -119,12 +119,7 @@ class GloveTrainer:
             # NOTE: here we assume the answer is one word!
 
             if not split_sentences:
-                if input_mask_mode == 'word':
-                    input_masks.append(np.array([index for index, w in enumerate(inp)], dtype=np.int32))
-                elif input_mask_mode == 'sentence':
-                    input_masks.append(np.array([index for index, w in enumerate(inp) if w == '.'], dtype=np.int32))
-                else:
-                    raise Exception("invalid input_mask_mode")
+                input_masks.append(np.array([index for index, w in enumerate(inp) if w == '.'], dtype=np.int32))
 
             relevant_labels.append(x["S"])
 

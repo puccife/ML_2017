@@ -2,6 +2,7 @@ import re
 from string import digits
 from autocorrect import spell
 import gensim
+from nltk.corpus import stopwords
 
 contractions_dict = {
     "<user>":"",
@@ -160,7 +161,7 @@ contractions_dict = {
     "wahhh":"wow",
     "#cantsayno":"can not say no",
     "loveee":"love",
-    "yayyy":"",
+    "yayyy":"approval",
     "heyyy":"hey",
     "omggg":"oh my god",
     "#ifindthatattractive":"i find that attractive",
@@ -170,7 +171,7 @@ contractions_dict = {
     "#fcblive":"football club barcelona live",
     "knowww":"know",
     "#harrypotterchatuplines":"harry potter chat up lines",
-    "waaa":"",
+    "waaa":"greeting",
     "misss":"miss",
     "thanksss":"thanks",
     "ya'll":"you all",
@@ -265,15 +266,28 @@ contractions_dict = {
     "#happybirthday":"happy birthday",
     "#soproud":"so proud",
     "#lovinglife":"loving life",
-    "#thuglife":"thug life"
-
+    "#thuglife":"thug life",
+    "didnt":"did not",
      }
 contractions_re = re.compile('(%s)' % '|'.join(contractions_dict.keys()))
+
+## Initialize Stopwords
+stopWords = stopwords.words("english")
+## Remove words that denote sentiment
+for w in ['no', 'not', 'nor', 'only', 'against', 'up', 'down', 'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ain', 'aren', 'mightn', 'mustn', 'needn', 'shouldn', 'wasn', 'weren', 'wouldn']:
+    stopWords.remove(w)
 
 def expand_contractions(s, contractions_dict=contractions_dict):
     def replace(match):
         return contractions_dict[match.group(0)]
     return contractions_re.sub(replace, s)
+
+def remove_stopwords_from_tweet(tweet):
+    tokens = tweet.split()
+    for word in tokens:
+        if word in stopWords:
+            tokens.remove(word)
+    return ' '.join(tokens)
 
 def clean_str(string):
 
@@ -293,8 +307,9 @@ def clean_tweets(tweet):
     tweet= tweet.translate(remove_digits)
     tweet= tweet.lower()
     tweet= expand_contractions(tweet)
+    tweet = tweet.lower()
     tweet = clean_str(tweet)
     tweet_tokenized = list(gensim.utils.tokenize(tweet))
-    #tweet_corrected = [spell(words) for words in tweet_tokenized]
     tweet = ' '.join(tweet_tokenized)
+    tweet = remove_stopwords_from_tweet(tweet)
     return tweet

@@ -9,7 +9,7 @@ class ArgumentLoader_cnn:
 
     def get_configuration(self):
         FLAGS = tf.flags.FLAGS
-        with open(os.path.join(CONFIG_DIR, config_json)) as data_file:
+        with open(os.path.join(CONFIG_DIR, config_json), encoding="utf-8", errors='ignore') as data_file:
             configuration = json.load(data_file)
             tf.flags.DEFINE_integer("num_filters", int(configuration["num_filters"]), "Size of last hidden layer.")
             tf.flags.DEFINE_integer("hidden_size", int(configuration["hidden_size"]), "Numbr of filters")
