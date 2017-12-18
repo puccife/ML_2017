@@ -31,10 +31,18 @@ class DMNTrainer:
     ivocab = {}
 
     def __init__(self, FLAGS):
+        """
+        Initializing dmn trainer with loaded tf.FLAGS
+        :param FLAGS: FLAGS for training
+        """
         self.FLAGS = FLAGS
 
 
     def load_babi(self):
+        """
+        load dataset in babi format.
+        :return: the preprocessed dataset.
+        """
         gt = GloveTrainer(vector_size=config.embed_size, glove_dir=self.FLAGS.glove_dir)
         self.word_embeddings = gt.generate_word_embeddings()
         self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg, self.FLAGS.dataset_test)
@@ -91,6 +99,9 @@ class DMNTrainer:
             return test, word_embedding, max_q_len, max_input_len, max_mask_len, rel_labels.shape[1], len(self.vocab)
 
     def train_DMN(self):
+        """
+        Function used to train DMN network
+        """
         model = DMN_PLUS(config, self)
         init = tf.global_variables_initializer()
         saver = tf.train.Saver()
@@ -154,9 +165,17 @@ class DMNTrainer:
                 data_input.delete_revs_file(args.destination_task, args.destination_task)
 
 def load_embedding():
+    """
+    Function used to load embedding word vector
+    :return: loaded embedding word vector
+    """
     with open('./embedding.pkl', 'rb') as f:
         return pickle.load(f)
 
 def save_embedding(obj):
+    """
+    Function used to save the word embedding
+    :param obj: word embedding dictionary
+    """
     with open('./embedding.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)

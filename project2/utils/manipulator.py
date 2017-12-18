@@ -16,23 +16,46 @@ class DatasetManipulator:
 
 
     def __init__(self, positive_url, negative_url, testing_url):
+        """
+        Initialize the dataset manipulator
+        :param positive_url: url of positive tweets
+        :param negative_url: url of negative tweets
+        :param testing_url: url of test tweets
+        """
         self.positive_url = positive_url
         self.negative_url = negative_url
         self.testing_url = testing_url
 
     def set_positive_url(self, positive_url):
+        """
+        Setter for positive tweet url
+        :param positive_url: url of positive tweets
+        """
         self.positive_url = positive_url
 
 
     def set_negative_url(self, negative_url):
+        """
+        Setter for negative tweet url
+        :param negative_url: url of negative tweets
+        """
         self.negative_url = negative_url
 
 
     def get_tweets(self):
+        """
+        Getter for tweets
+        :return: the stored tweets
+        """
         return self.tweets
 
 
     def generate_dataset(self, total_samples):
+        """
+        Generating the dataset given the url defined in __init__ function
+        :param total_samples: number of samples to load
+        :return: the generated dataset with half positive sentences and half negative sentences.
+        """
         loadedInstances = 0
         if self.positive_url == None or self.negative_url == None:
             raise Exception('Dataset url not set')
@@ -51,13 +74,17 @@ class DatasetManipulator:
         positive_tweets.close()
         return self.get_tweets()
 
-    def generate_testing_dataset(self):
+    def generate_testing_dataset(self, size=10000):
+        """
+        Generating the testing dataset
+        :return: the generated testing dataset
+        """
         loadedInstances = 0
         if self.testing_url == None:
             raise Exception('Testing dataset url not set')
         testing_tweets = open(self.testing_url, "r", encoding="utf-8", errors='ignore')
         self.testing_tweets = []
-        while loadedInstances < 10000:
+        while loadedInstances < size:
             raw_test = testing_tweets.readline()
             raw_test = (raw_test.split(",", 1)[1])
             clean_test = clean_tweets(raw_test)
@@ -67,6 +94,11 @@ class DatasetManipulator:
         return self.testing_tweets
 
     def format_like_babi(self, reviews_to_format):
+        """
+        Format sentences in Babi Facebook format
+        :param reviews_to_format: tweets
+        :return: the formatted sentences
+        """
         reviews_text_to_output = ""
         s_index = 1
         question = "What is the sentiment?"
@@ -80,7 +112,11 @@ class DatasetManipulator:
         return reviews_text_to_output    
 
     def save_reviews_splitted(self, reviews_train, reviews_test):
-        # Train
+        """
+        Save formatted tweets
+        :param reviews_train: training tweets
+        :param reviews_test: testing tweets
+        """
         with (open("./data/tweet_train.txt", "w", encoding="utf-8", errors='ignore')) as rev_file_train:
             rev_file_train.write(reviews_train)
         # Test
@@ -88,6 +124,11 @@ class DatasetManipulator:
             rev_file_train.write(reviews_test)
 
     def init_babi(self, fname):
+        """
+        Initializing dictionary in babi format before training
+        :param fname: name of the file to open (training or testing usually)
+        :return: the Babi formatted dictionary
+        """
         print("==> Loading test from %s" % fname)
         tasks = []
         task = None
@@ -117,6 +158,13 @@ class DatasetManipulator:
         return tasks
 
     def split_and_shuffle(self, tweets, ratio, seed):
+        """
+        Split and shuffle tweets according to specified ratio and seed
+        :param tweets: tweets to shuffle
+        :param ratio: ratio of the splitting
+        :param seed: seed to use
+        :return: return the splitted dataset
+        """
         split_index = int(len(tweets)*ratio)
         train, test = tweets[:split_index], tweets[split_index:]
         np.random.seed(seed)
@@ -126,6 +174,11 @@ class DatasetManipulator:
         return train, test
 
     def get_generator(self, training_set, FLAGS):
+        """
+        Creating a generator for the training batches
+        :param training_set: training set
+        :param FLAGS: flags containing parameters used to create batches (size, etc...)
+        """
         word_size = FLAGS.word_dimension
         batch_size = FLAGS.batch_size
         max_lenght = FLAGS.max_lenght
