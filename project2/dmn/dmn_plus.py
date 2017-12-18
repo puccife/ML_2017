@@ -63,7 +63,7 @@ class Config(object):
     clean_datasets = False
 
     # train_mode = False
-    train_mode = True
+    train_mode = False
     
     # Transfer Learning parameters
     fine_tuning_mode = False

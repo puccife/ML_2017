@@ -3,7 +3,7 @@
   "batch_size":"100",
   "num_training_iterations": "900",
   "num_testing_iterations": "100",
-  "num_epochs": "10",
+  "num_epochs": "15",
   "word_dimension" : "200",
   "max_length" : "20",
   "dataset_neg" : "./twitter-datasets/train_neg_full.txt",
