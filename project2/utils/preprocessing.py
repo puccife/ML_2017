@@ -311,5 +311,5 @@ def clean_tweets(tweet):
     tweet = clean_str(tweet)
     tweet_tokenized = list(gensim.utils.tokenize(tweet))
     tweet = ' '.join(tweet_tokenized)
-    tweet = remove_stopwords_from_tweet(tweet)
+    #tweet = remove_stopwords_from_tweet(tweet)
     return tweet

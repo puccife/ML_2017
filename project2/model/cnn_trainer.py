@@ -13,7 +13,7 @@ from keras.callbacks import TensorBoard
 import numpy as np
 from keras.layers import Embedding
 from keras.layers import Dense, Input, Flatten
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout ,SpatialDropout1D
 from keras.layers import GRU, LSTM
 from keras.models import Model
 from keras.layers.merge import Concatenate
@@ -95,13 +95,13 @@ class CNNTrainer:
         print("Running model")
 
         dropout_prob = (0.1, 0.5)
-        filter_sizes = (3,3,3,3,3,3,3)
+        filter_sizes = [5]
 
         input_shape = (self.FLAGS.max_length, self.FLAGS.word_dimension)
         model_input = Input(shape=input_shape)
 
         z = model_input
-        #z = Dropout(dropout_prob[0])(z)
+        z = SpatialDropout1D(dropout_prob[0])(z)
 
         conv_blocks = []
         for sz in filter_sizes:
