@@ -9,10 +9,19 @@ class GloveTrainer:
     missing_voc = None
 
     def __init__(self, vector_size, glove_dir):
+        """
+        Initialize the glove trainer
+        :param vector_size: Specify the size of the word_vector
+        :param glove_dir: Specify the location of glove dir
+        """
         self.vector_size = vector_size
         self.GLOVE_DIR = glove_dir
 
     def generate_word_embeddings(self):
+        """
+        This functions is created to load the pretrained glove embedding
+        :return: The word embedding as a dictionary
+        """
         print('Indexing word vectors.')
         f = open('./glove.twitter.27B/glove.twitter.27B.'+str(self.vector_size)+'d.txt', encoding="utf-8", errors='ignore')
         for line in f:
@@ -25,6 +34,12 @@ class GloveTrainer:
 
 
     def manipulate_dataset(self, dataset, word_embeddings):
+        """
+        Returning the dataset as matrix of vectors. Where each word is mapped to a vector
+        :param dataset: the dataset
+        :param word_embeddings: the word embedding dictionary
+        :return: The corresponding manipulated dataset.
+        """
         self.missing_voc = {}
         for i in range(len(dataset)):
             matrix_embedding = []
@@ -41,10 +56,25 @@ class GloveTrainer:
         return dataset
 
     def get_missing_voc(self):
+        """
+        Function used to return a dictionary of missing words with their frequence
+        :return: Dictionary of missing words.
+        """
         return self.missing_voc
 
 
     def process_word(self, word_embeddings, word, vocab, ivocab, word_size, to_return='wemb', silent=True):
+        """
+        Function used to process a word into an embedding vector.
+        :param word_embeddings: 
+        :param word: word to process
+        :param vocab: Dictionary containing word vectors
+        :param ivocab: Dictionary containing word vectors
+        :param word_size: Size of each word vector
+        :param to_return: type of vector to return
+        :param silent: Verbose debug option
+        :return: the new embedded word.
+        """
         if not word in word_embeddings:
             self.create_vector(word, word_embeddings, word_size, silent)
         if not word in vocab:
@@ -58,7 +88,15 @@ class GloveTrainer:
         return word_embeddings[word]
 
     def create_vector(self, word, word2vec, word_vector_size, silent=True):
-        # if the word is missing from Glove or Google Vectors, create some fake vector and store in glove!
+
+        """
+        Creating a new word in case he word is missing from Glove!
+        :param word: word to process
+        :param word2vec: word embedding dictionary
+        :param word_vector_size: size of the word vector to create
+        :param silent: debug option verbose
+        :return: the new vector of the created word.
+        """
         vector = np.random.uniform(0.0, 1.0, (word_vector_size,))
         word2vec[word] = vector
         if not silent:
@@ -66,6 +104,17 @@ class GloveTrainer:
         return vector
 
     def process_input(self, data_raw, floatX, word2vec, vocab, ivocab, embed_size, split_sentences=False):
+        """
+        Process input of tweets using Babi format.
+        :param data_raw: Raw data to process
+        :param floatX: size of float to be used
+        :param word2vec: pretrained word embedding dictionary
+        :param vocab: dictionary to store the words in terms of their sequential appearance 
+        :param ivocab: dictionary to store the words in terms of their sequential appearance 
+        :param embed_size: size of the word vector
+        :param split_sentences: flag used to split sentences in the same tweet - NOT USED
+        :return: the cleaned input
+        """
         questions = []
         inputs = []
         answers = []
@@ -126,6 +175,13 @@ class GloveTrainer:
         return inputs, questions, answers, input_masks, relevant_labels
 
     def create_embedding(self, word2vec, ivocab, embed_size):
+        """
+        Function used to create the embedding dictionary
+        :param word2vec: pretrained word2vec embedding
+        :param ivocab: dictionary used to create the embedding
+        :param embed_size: size of the embedding
+        :return: the embedding dictionary
+        """
         embedding = np.zeros((len(ivocab), embed_size))
         for i in range(len(ivocab)):
             word = ivocab[i]
@@ -136,6 +192,11 @@ class GloveTrainer:
         return embedding
 
     def get_sentence_lens(self, inputs):
+        """
+        Function used to get lens of a sentence
+        :param inputs: tweet
+        :return: parameters on the sentence lens
+        """
         lens = np.zeros((len(inputs)), dtype=int)
         sen_lens = []
         max_sen_lens = []
@@ -149,12 +210,28 @@ class GloveTrainer:
         return lens, sen_lens, max(max_sen_lens)
 
     def get_lens(self, inputs, split_sentences=False):
+        """
+        Function used to get the lens of a sentence
+        :param inputs: the sentence
+        :param split_sentences: Flag used to split sentences -- not used
+        :return: the lens of the tweet
+        """
         lens = np.zeros((len(inputs)), dtype=int)
         for i, t in enumerate(inputs):
             lens[i] = t.shape[0]
         return lens    
 
     def pad_inputs(self, inputs, lens, max_len, mode="", sen_lens=None, max_sen_len=None):
+        """
+        Function used to pad the input in case the input is shorter than the predefined lenght of each sentence
+        :param inputs: sentences
+        :param lens: defined lens of tweet
+        :param max_len: max length defined
+        :param mode: defined mode to pad - using mask or splitting (mask used)
+        :param sen_lens: sentences
+        :param max_sen_len: lens of sentences
+        :return: the padded input.
+        """
         if mode == "mask":
             padded = [np.pad(inp, (0, max_len - lens[i]), 'constant', constant_values=0) for i, inp in enumerate(inputs)]
             return np.vstack(padded)

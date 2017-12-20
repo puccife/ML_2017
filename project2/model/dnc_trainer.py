@@ -11,7 +11,6 @@ import dnc.addressing as addressing
 
 from utils.manipulator import DatasetManipulator
 from utils.pretrained_glove import GloveTrainer
-from utils.memory_manager import memory_usage
 
 class DNCTrainer:
 
@@ -25,7 +24,7 @@ class DNCTrainer:
 
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
-        #self.__init_model()
+        self.__init_model()
 
 
     def __init_model(self):
