@@ -12,9 +12,9 @@
     "optimizer_epsilon": "1e-10",
     "num_testing_iterations": "10000",
     "num_epochs": "10",
-    "report_interval": "10",
+    "report_interval": "2500",
     "checkpoint_dir": "./checkpoints/tmp",
-    "checkpoint_interval": "10000",
+    "checkpoint_interval": "5000",
     "word_dimension": "200",
     "max_lenght": "20",
     "dataset_neg": "./twitter-datasets/train_neg_full.txt",
@@ -25,5 +25,5 @@
     "seed": "33",
     "ratio": "1.",
     "num_classes": "2",
-    "total_samples": "100000"
+    "total_samples": "2000000"
 }
