@@ -1,16 +1,13 @@
 import time
 import json
-import random
 import math
 
 import tensorflow as tf
-import operator
 import dnc.dnc as dnc
-import dnc.access as access
-import dnc.addressing as addressing
 
-from utils.manipulator import DatasetManipulator
-from utils.pretrained_glove import GloveTrainer
+from preprocessing.manipulator import DatasetManipulator
+from word_embedding_model.pretrained_glove import GloveTrainer
+import pandas as pd
 
 class DNCTrainer:
 
@@ -19,6 +16,7 @@ class DNCTrainer:
     testing_generator = None
     dm = None
     training_set = None
+    validation_set = None
     testing_set = None
     missing_voc = None
 
@@ -30,20 +28,14 @@ class DNCTrainer:
     def __init_model(self):
         gt = GloveTrainer(vector_size=self.FLAGS.word_dimension, glove_dir=self.FLAGS.glove_dir)
         word_embeddings = gt.generate_word_embeddings()
-        self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg)
+        self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg, self.FLAGS.dataset_test)
         tweets = self.dm.generate_dataset(total_samples=self.FLAGS.total_samples)
-
+        test = self.dm.generate_testing_dataset()
         tweets_glove = gt.manipulate_dataset(tweets.copy(), word_embeddings)
-        self.missing_voc = gt.get_missing_voc()
-        #print(sorted(self.missing_voc, key=self.missing_voc.__getitem__))
-        #print((self.missing_voc))
-        #self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
-        self.d = dict((k, v) for k, v in self.missing_voc.items() if v >= 50)
-        self.sorted_d = sorted(self.d.items(), key=operator.itemgetter(1))
-        print(self.sorted_d)
-        self.training_set, self.testing_set = self.dm.split_and_shuffle(tweets_glove, ratio=self.FLAGS.ratio, seed=self.FLAGS.seed)
+        self.training_set, self.validation_set = self.dm.split_and_shuffle(tweets_glove, ratio=self.FLAGS.ratio, seed=self.FLAGS.seed)
+        self.testing_set = gt.manipulate_dataset(test.copy(), word_embeddings)
         self.__create_generators()
-
+        print("Training on: " + str(len(self.training_set)) + " elements")
 
     def __create_generators(self):
         self.training_generator = self.dm.get_generator(self.training_set, self.FLAGS)
@@ -178,7 +170,6 @@ class DNCTrainer:
                                                   y_:(datasetTrain[1]),
                                                   mask:(datasetTrain[2]),
                                                   learning_rate: self.FLAGS.learning_rate})
-          randomizer = random.Random(1)
 
           #Viene calcolato di quanto debba essere diminuito il learning rate in ogni epoca.
           if self.FLAGS.num_epochs > 10:
@@ -188,18 +179,13 @@ class DNCTrainer:
 
           #Variabili atte a contenere i migliori risultati ottenuti
           best_train_accuracy  = 0
-          best_test_accuracy = 0
 
           for epochs in range(self.FLAGS.num_epochs):
               #Se il passo di inizializzazione e' stato appena fatto ho gia' il generatore, altrimenti lo devo ri-ottenere
               if not glob:
                   self.__create_generators()
-                  print("Epoch " + str(epochs))
               if self.FLAGS.num_epochs > 1 :
                   start_iteration = 0
-
-              epoch_train_accuracy = 0
-              epoch_test_accuracy = 0
 
               total_accuracy = 0
               total_entropy = 0
@@ -216,7 +202,8 @@ class DNCTrainer:
               info1 = '\nOra: '+date+', Epoca '+str(epochs)+ ', Learning rate: '+str(newLearningRate)
               outputFile.write(info1)
               #################################################TRAINING########################################################
-              for train_iteration in range(start_iteration, (self.FLAGS.num_training_iterations//self.FLAGS.batch_size)):
+
+              for train_iteration in range(start_iteration, int(self.FLAGS.total_samples*self.FLAGS.ratio//self.FLAGS.batch_size)):
                   if glob:
                       glob = False
                   else:
@@ -270,41 +257,24 @@ class DNCTrainer:
               #Se il risultato corrente e' migliore del precedente viene salvato
               if epoch_train_accuracy> best_train_accuracy:
                   best_train_accuracy = epoch_train_accuracy
-              # Testing
-              test_accuracy = 0
-              total_test_accuracy = 0
 
-              #################################################TESTING########################################################
-              for test_iteration in range(0,(self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)):
-                  datasetTest = next(self.testing_generator)
-                  act_accuracy = sess.run(accuracy,
-                                          {x: datasetTest[0],
-                                           y_: datasetTest[1],
-                                           mask: datasetTest[2]})
-                  test_accuracy += act_accuracy
-                  total_test_accuracy += act_accuracy
-                  if (test_iteration + 1) % self.FLAGS.report_interval == 0:
+          predictions = []
+          for test_iteration in range(0,(self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)):
+              datasetTest = next(self.testing_generator)
+              res_prediction = sess.run(prediction,
+                                      {x: datasetTest[0],
+                                       y_: datasetTest[1],
+                                       mask: datasetTest[2]})
 
-                      tf.logging.info("%d: Avg testing accuracy %f.\n",
-                                      test_iteration+1, test_accuracy / self.FLAGS.report_interval
-                                      )
-                      info4 = str(test_iteration+1)+ ": Avg testing accuracy: "+str(test_accuracy / self.FLAGS.report_interval)+"\n"
-                      outputFile.write(info4)
-                      test_accuracy = 0
-              tf.logging.info("Epoch: %d,Iteration: %d, Average Testing accuracy: %f\n",epochs, test_iteration+1,
-                              total_test_accuracy /( self.FLAGS.num_testing_iterations//self.FLAGS.batch_size))
-              info5 = "Epoch: "+str(epochs)+",Iteration: "+ str(test_iteration+1)+", Average Testing accuracy: "+str(total_test_accuracy /( self.FLAGS.num_testing_iterations//self.FLAGS.batch_size))+"\n"
-              outputFile.write(info5)
-
-              epoch_test_accuracy = total_test_accuracy /( self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)
-              if epoch_test_accuracy > best_test_accuracy:
-                  best_test_accuracy = epoch_test_accuracy
-
-          date = time.strftime("%H:%M:%S")
-          tf.logging.info("Ora fine: %s\nBest training result: %f,Best testing result: %f\n", date,
-                          best_train_accuracy, best_test_accuracy)
-          info6 = "Ora fine: "+date+"\nBest training result: "+str(best_train_accuracy)+", Best testing result: "+str(best_test_accuracy)
-          outputFile.write(info6)
+              predictions.extend(res_prediction)
+          print("How many predictions? " + str(len(predictions)))
+          final_predictions = pd.DataFrame(predictions.copy())
+          final_predictions.index += 1
+          final_predictions = final_predictions.reset_index()
+          final_predictions.columns = ['Id', 'Prediction']
+          final_predictions = final_predictions.set_index('Id')
+          final_predictions[final_predictions['Prediction'] == 0] = -1
+          final_predictions.to_csv('./dnc_prediction.csv')
           outputFile.close()
 
 

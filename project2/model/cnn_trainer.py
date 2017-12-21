@@ -1,28 +1,13 @@
-import time
-import json
-import random
-import math
-
-import tensorflow as tf
-import operator
-
-from utils.manipulator_cnn import DatasetManipulator_cnn
-from utils.pretrained_glove_cnn import GloveTrainer_cnn
+from preprocessing.manipulator_cnn import DatasetManipulator_cnn
+from preprocessing.pretrained_glove_cnn import GloveTrainer_cnn
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import TensorBoard
 import numpy as np
-from keras.layers import Embedding
-from keras.layers import Dense, Input, Flatten
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout
-from keras.layers import GRU, LSTM
+from keras.layers import Dense, Input
+from keras.layers import Conv1D, MaxPooling1D, Dropout
+from keras.layers import LSTM
 from keras.models import Model
 from keras.layers.merge import Concatenate
-from keras.preprocessing import sequence
-import re
-import itertools
-from collections import Counter
-from utils.preprocessing import clean_tweets
-import os
 
 
 class CNNTrainer:
@@ -87,9 +72,6 @@ class CNNTrainer:
         print("y_train shape:", len(self.y_train))
         print("y_test shape:", len(self.y_test))
 
-
-        self.run_model()
-
     def run_model(self):
 
         print("Running model")
@@ -101,7 +83,6 @@ class CNNTrainer:
         model_input = Input(shape=input_shape)
 
         z = model_input
-        #z = Dropout(dropout_prob[0])(z)
 
         conv_blocks = []
         for sz in filter_sizes:
@@ -113,7 +94,6 @@ class CNNTrainer:
 
             conv = MaxPooling1D(pool_size=2)(conv)
             conv = LSTM(128)(conv)
-            #conv = Flatten()(conv)
             conv_blocks.append(conv)
 
         z = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
@@ -132,7 +112,5 @@ class CNNTrainer:
 
         callbacks_list = [checkpoint, tbCallBack]
 
-
-
         model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2,callbacks=callbacks_list)
-        #model.save('my_test_model.h5')
+        model.save('my_test_model.h5')

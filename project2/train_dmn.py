@@ -1,9 +1,8 @@
 import tensorflow as tf
 
-from utils.argument_loader import ArgumentLoader
-#from model.dnc_trainer import DNCTrainer
+from config.argument_loader import ArgumentLoader
 from model.dmn_trainer import DMNTrainer
-# Arguments
+# Loading Arguments
 al = ArgumentLoader()
 FLAGS = al.get_configuration()
 

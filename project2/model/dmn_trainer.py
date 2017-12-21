@@ -1,7 +1,4 @@
 import time
-import json
-import random
-import math
 import os
 
 import pickle 
@@ -10,8 +7,8 @@ import numpy as np
 
 import tensorflow as tf
 
-from utils.manipulator import DatasetManipulator
-from utils.pretrained_glove import GloveTrainer
+from preprocessing.manipulator import DatasetManipulator
+from word_embedding_model.pretrained_glove import GloveTrainer
 
 from dmn.dmn_plus import Config, DMN_PLUS
 

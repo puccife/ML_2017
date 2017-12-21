@@ -1,6 +1,9 @@
-sentence = "watching off their rockets on nbc . it's hilariousss"
+sentence = "imagine all the people"
 
 from preprocessing.preproc import PreprocessTweets
+from utils.preprocessing import clean_tweets
+
+print(clean_tweets(sentence))
 
 pt = PreprocessTweets()
 
