@@ -4,8 +4,10 @@ In this readme we include all the infos about the code available in this reposit
 ## Prerequisites
 
 ### Datasets + additional resources
-Since we are using pretrained GloVe embeddings here is the link to obtain them, just put them in the project folder without renaming the resources:
+Since we are using pretrained GloVe embeddings here is the link to obtain them, just put them in the project folder without renaming the resources: 
+- GloVe pretrained word embeddings: https://drive.switch.ch/index.php/s/Nt9dT6cU8VoXTiW
 We provide with this link the dataset used for training and testing, which is the one available for the competition, as above must be put in the project folder without renaming the resources:
+- Twitter dataset: https://drive.switch.ch/index.php/s/SBVfQda8SFyxo0t
 ### Libraries
 - Gensim
 - NLTK
