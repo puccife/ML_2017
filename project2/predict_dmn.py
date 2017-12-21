@@ -5,7 +5,7 @@ import pandas as pd
 
 import tensorflow as tf
 
-from utils.argument_loader import ArgumentLoader
+from config.argument_loader import ArgumentLoader
 from dmn.dmn_plus import Config, DMN_PLUS
 from model.dmn_trainer import DMNTrainer
 
