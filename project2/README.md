@@ -19,6 +19,7 @@ We created 4 different models:
 - DMN (Dynamic Memory Network)
 - DNC (Differentiable Neural 
 
+### Training
 For each of these models we provide the functions to train them and to predict the results given a pretrained and saved model.
 In particular:
  - train_lstm: to train LSTM network (Expected training time: ≈ 3h, with GPU)
@@ -26,6 +27,9 @@ In particular:
  - train_dmn: to train DMN network (Expected training time: ≈ 20h, with GPU Tesla TK80 on Amazon AWS Cluster)
  - train_dnc: to train DNC network (Expected training time: ≈ 20h, with GPU Tesla TK80 on Amazon AWS Cluster)
  
+### Predicting
+
+#### Getting the pretrained models
  To predict the results with one of the given models you have 2 alternatives:
  - Train the model and put the model in the 'weights/MODEL_weights/' folder
  - Download the pretrained models at: https://drive.switch.ch/index.php/s/J1WK5J6QKuYwqHp
@@ -35,3 +39,6 @@ In particular:
  - predict_cnn: to predict using CNN network
  - predict_dmn: to predict using DMN network (Must be done with GPU!)
  - predict_dnc: to predict using DNC network
+
+### Result
+After the predicting phase, is possible to find the CSV prediction with the name of the model in the folder 'predictions_csv'
