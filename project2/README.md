@@ -66,7 +66,7 @@ All the code is working and properly commented, here we explain briefly the cont
 - preprocessing: used to preprocess and clean the tweets
 - word embedding model: used to manipulate the tweets and extract the word vector of each word
 
-### If someone is not clear or not working contact us please:
+### If something is not clear or not working contact us please:
 - federico.pucci@epfl.ch
 - fouad.mazen@epfl.ch
 - davor.todorovski@epfl.ch
