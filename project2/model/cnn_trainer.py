@@ -3,16 +3,9 @@ from preprocessing.pretrained_glove_cnn import GloveTrainer_cnn
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import TensorBoard
 import numpy as np
-<<<<<<< HEAD
 from keras.layers import Dense, Input
-from keras.layers import Conv1D, MaxPooling1D, Dropout
+from keras.layers import Conv1D, MaxPooling1D, Dropout ,SpatialDropout1D
 from keras.layers import LSTM
-=======
-from keras.layers import Embedding
-from keras.layers import Dense, Input, Flatten
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Merge, Dropout ,SpatialDropout1D
-from keras.layers import GRU, LSTM
->>>>>>> 35e2c59dc6976179c50fb0818dbf245cb72b553d
 from keras.models import Model
 from keras.layers.merge import Concatenate
 
@@ -121,11 +114,8 @@ class CNNTrainer:
 
         # Creating the model
         z = model_input
-<<<<<<< HEAD
-=======
         # Spatial dropout applied on the input.
         z = SpatialDropout1D(dropout_prob[0])(z)
->>>>>>> 35e2c59dc6976179c50fb0818dbf245cb72b553d
 
         # Creating of the convolutional blocks that are corresponding to
         # the length of the filter sizes array.
@@ -141,12 +131,9 @@ class CNNTrainer:
             conv = MaxPooling1D(pool_size=2)(conv)
             # LSTM layer
             conv = LSTM(128)(conv)
-<<<<<<< HEAD
-=======
             #conv = Flatten()(conv)
 
             # Appending this structure to the block
->>>>>>> 35e2c59dc6976179c50fb0818dbf245cb72b553d
             conv_blocks.append(conv)
 
         # Concatenating all the blocks to form the model.
@@ -170,10 +157,6 @@ class CNNTrainer:
 
         callbacks_list = [checkpoint, tbCallBack]
 
-<<<<<<< HEAD
-=======
-
         # Running the model.
->>>>>>> 35e2c59dc6976179c50fb0818dbf245cb72b553d
         model.fit_generator(self.generator(),steps_per_epoch=self.FLAGS.steps_per_epoch, epochs=self.FLAGS.num_epochs,validation_data= self.generator_validator(),validation_steps=self.FLAGS.validation_step, verbose=2,callbacks=callbacks_list)
         model.save('my_test_model.h5')
