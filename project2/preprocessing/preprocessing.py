@@ -3,6 +3,7 @@ from string import digits
 import gensim
 from nltk.corpus import stopwords
 
+# English Contractions that are most common and most found in the training set.
 contractions_dict = {
     "<user>":"",
     "<url>":"",
@@ -273,8 +274,11 @@ contractions_re = re.compile('(%s)' % '|'.join(contractions_dict.keys()))
 ## Initialize Stopwords
 stopWords = stopwords.words("english")
 ## Remove words that denote sentiment
-for w in ['no', 'not', 'nor', 'only', 'against', 'up', 'down', 'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ain', 'aren', 'mightn', 'mustn', 'needn', 'shouldn', 'wasn', 'weren', 'wouldn']:
+for w in ['no', 'not', 'nor', 'only', 'against', 'up', 'down', 'couldn', 'didn', 'doesn', 'hadn', 'hasn',
+'haven', 'isn', 'ain', 'aren', 'mightn', 'mustn', 'needn',
+'wasn', 'weren', 'wouldn','shouldn']:
     stopWords.remove(w)
+
 
 def expand_contractions(s, contractions_dict=contractions_dict):
     def replace(match):
@@ -289,7 +293,11 @@ def remove_stopwords_from_tweet(tweet):
     return ' '.join(tokens)
 
 def clean_str(string):
-
+    """
+    Cleans the tweet from emoji
+    :param string: takes a tweet
+    :return: A cleaned tweet
+    """
     string = re.sub(r":\)","grinning face", string)
     string = re.sub(r":'\)","face of joy", string)
     string = re.sub(r"=\)","grinning face", string)
@@ -301,7 +309,11 @@ def clean_str(string):
 
 
 def clean_tweets(tweet):
-
+    """
+    Cleans the tweet from digits,contractions, and transforming it to lower case
+    :param string: takes a tweet
+    :return: A cleaned tweet
+    """
     remove_digits = str.maketrans('', '', digits)
     tweet= tweet.translate(remove_digits)
     tweet= tweet.lower()
