@@ -48,7 +48,11 @@ def create_prediction(name, final_prediction):
         df.columns = ['Id', 'Prediction']
         df = df.set_index('Id')
         df[df['Prediction'] == 0] = -1
-        df.to_csv("./predictions_csv/"+name+".csv")
+        df.to_csv('.predictions_csv/DMN_prediction.csv')
+        df = pd.read_csv('.predictions_csv/DMN_prediction.csv')
+        df = df.set_index('Id')
+        df[df['Prediction'] == 0] = -1
+        df.to_csv('predictions_csv/DMN_prediction.csv')
 
 if __name__ == "__main__":
   tf.app.run()
