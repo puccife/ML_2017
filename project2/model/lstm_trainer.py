@@ -8,7 +8,7 @@ from keras.preprocessing.text import Tokenizer
 import tflearn
 from tflearn.data_utils import to_categorical, pad_sequences
 
-class LSTMTRainer:
+class LSTMTrainer:
 
     FLAGS = None
     embeddings_index = {}
@@ -17,6 +17,8 @@ class LSTMTRainer:
     y_train = None
     x_val = None
     y_val = None
+
+    model = None
 
     test_data = None
     test_ids = None
@@ -29,7 +31,7 @@ class LSTMTRainer:
     def __init_model(self):
         # All of the train tweets are read from the data files and are being put in a list. Before that, they are cleaned by the text_to_wordlist function
         tweets_pos = [self.text_to_wordlist(line.rstrip('\n')) for line in open(self.FLAGS.train_data_file_pos, 'r', encoding='utf-8')]
-        tweets_neg = [self.text_to_wordlist(line.rstrip('\n')) for line in open(self.FLAGS_train_data_file_neg, 'r', encoding='utf-8')]
+        tweets_neg = [self.text_to_wordlist(line.rstrip('\n')) for line in open(self.FLAGS.train_data_file_neg, 'r', encoding='utf-8')]
         tweets_train = tweets_pos + tweets_neg
         labels = np.ones(len(tweets_train), dtype=np.int8)
         for i in range(int(len(labels) / 2),
@@ -115,6 +117,8 @@ class LSTMTRainer:
         self.x_val = data[-nb_validation_samples:]
         self.y_val = labels[-nb_validation_samples:]
 
+        self.create_model()
+
     def indexing_wordvectors(self):
         print('Indexing word vectors')
         f = open(self.FLAGS.embedding_dir, 'r', encoding='utf-8')
@@ -193,33 +197,39 @@ class LSTMTRainer:
         # Return a list of words
         return text
 
-    def train_model(self):
-        print('Starting the training process!')
+
+    def create_model(self):
         tf.reset_default_graph()
         net = tflearn.input_data([None, self.FLAGS.max_sequence_length])
-        net = tflearn.embedding(net, input_dim=self.FLAGS.max_nb_words, output_dim=self.FLAGS.embedding_dim, trainable=False,
+        net = tflearn.embedding(net, input_dim=self.FLAGS.max_nb_words, output_dim=self.FLAGS.embedding_dim,
+                                trainable=False,
                                 name='embeddingLayer')
         net = tflearn.lstm(net, 256, return_seq=True)
-        net = tflearn.dropout(net, 0.25)
+        net = tflearn.dropout(net, 0.5)
         net = tflearn.lstm(net, 256)
-        net = tflearn.dropout(net, 0.25)
+        net = tflearn.dropout(net, 0.5)
         net = tflearn.fully_connected(net, 2, activation='softmax')
         net = tflearn.regression(net, optimizer='adam', loss='categorical_crossentropy')
-        model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=3, best_val_accuracy=0.864,
+        self.model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=3, best_val_accuracy=0.864,
                             # We are using tensorboard_verbose=3 for the best possible
                             best_checkpoint_path='checkpoints\\model6\\' + self.FLAGS.model_name)  # visualisation and save checkpoints from the model if the
+
+
+
+    def train_model(self):
+        print('Starting the training process!')
         embeddingsLayer = tflearn.get_layer_variables_by_name('embeddingLayer')[0]  # validation accuracy is bigger than 0.864.
-        model.set_weights(embeddingsLayer,
+        self.model.set_weights(embeddingsLayer,
                           self.embedding_matrix)  # Custom weight matrix generated from the GloVe is set as weights for the Embedding layer
-        model.fit(self.x_train, self.y_train, validation_set=(self.x_val, self.y_val), n_epoch=5,
+        self.model.fit(self.x_train, self.y_train, validation_set=(self.x_val, self.y_val), n_epoch=5,
                   show_metric=True, batch_size=256, shuffle=True)
-        model.save(self.FLAGS.model_path)
+        self.model.save(self.FLAGS.model_path)
         print('Training done!')
 
     def test_model(self):
         print('Testing the model!')
-        model.load(model_file=self.FLAGS.model_path)
-        preds = model.predict(self.test_data)
+        self.model.load(model_file=self.FLAGS.model_path)
+        preds = self.model.predict(self.test_data)
         preds_array = []
         for i in range(0, len(preds)):
             index = np.argmax(preds[i,
@@ -233,4 +243,4 @@ class LSTMTRainer:
 
         # Generating submission file
         submission = pd.DataFrame({'Id': self.test_ids, 'Prediction': preds_array})
-        submission.to_csv('submissions\\' + self.FLAGS.model_name + '.csv', sep=',', index=False)
+        submission.to_csv('./predictions_csv/LSTM_prediction.csv', sep=',', index=False)

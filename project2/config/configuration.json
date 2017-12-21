@@ -13,7 +13,7 @@
     "num_testing_iterations": "10000",
     "num_epochs": "10",
     "report_interval": "2500",
-    "checkpoint_dir": "./checkpoints/tmp",
+    "checkpoint_dir": "./weights/DNC_weights/",
     "checkpoint_interval": "5000",
     "word_dimension": "200",
     "max_lenght": "20",

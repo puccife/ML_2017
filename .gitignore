@@ -1,4 +1,5 @@
-
+*checkpoints*
+*weights*
 *.txt
 *.csv
 *checkpoint.ipynb

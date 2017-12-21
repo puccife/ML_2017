@@ -1,8 +1,6 @@
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import numpy as np
 import pandas as pd
 
 import tensorflow as tf
@@ -17,7 +15,7 @@ FLAGS = al.get_configuration()
 def main(args):
     dmn_trainer, config, model, init, saver = load_prerequisites()
     results = predict(saver, init, model, config, dmn_trainer)
-    create_prediction("epoch3", results)
+    create_prediction("DMN_prediction", results)
 
 def load_prerequisites():
     dmn_trainer = DMNTrainer(FLAGS)
@@ -32,7 +30,7 @@ def predict(saver, init, model, config, dmn_trainer):
         session.run(init)
 
         print('==> restoring weights')
-        saver.restore(session, 'weights/task' + str(model.config.babi_id) + '.weights')
+        saver.restore(session, 'weights/DMN_weights/task' + str(model.config.babi_id) + '.weights')
 
         print('==> running DMN')
         predictions = model.run_epoch(session, model.test)
@@ -50,7 +48,7 @@ def create_prediction(name, final_prediction):
         df.columns = ['Id', 'Prediction']
         df = df.set_index('Id')
         df[df['Prediction'] == 0] = -1
-        df.to_csv(name+".csv")
+        df.to_csv("./predictions_csv/"+name+".csv")
 
 if __name__ == "__main__":
   tf.app.run()

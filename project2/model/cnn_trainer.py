@@ -1,5 +1,5 @@
 from preprocessing.manipulator_cnn import DatasetManipulator_cnn
-from preprocessing.pretrained_glove_cnn import GloveTrainer_cnn
+from word_embedding_model.pretrained_glove_cnn import GloveTrainer_cnn
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import TensorBoard
 import numpy as np

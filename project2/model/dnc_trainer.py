@@ -274,9 +274,113 @@ class DNCTrainer:
           final_predictions.columns = ['Id', 'Prediction']
           final_predictions = final_predictions.set_index('Id')
           final_predictions[final_predictions['Prediction'] == 0] = -1
-          final_predictions.to_csv('./dnc_prediction.csv')
+          final_predictions.to_csv('./predictions_csv/DNC_prediction.csv')
           outputFile.close()
 
+    def test_model(self):
+        print("Testing model")
+        max_lenght = self.FLAGS.max_lenght
+          #Placeholder che andra' a contenere il batch di label relativa alle recensioni
+        y_= tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght,self.FLAGS.num_classes])
 
-    def __training_step(self):
-        print("Training step")
+        #Placeholder che andra' a contenere il batch di recensioni opportunamente codificate
+        x = tf.placeholder(tf.float32, [self.FLAGS.batch_size, max_lenght, self.FLAGS.word_dimension])
+
+        #Placeholder che andra' a contenere il batch di maschere da applicare per il calcolo della cross-entropy
+        mask = tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght])
+
+        #Richiamando il metodo run_model ottengo la sequenza prodotta dalla rete
+        output_logits = self.run_model(x)
+
+        #Calcolo della cross entropy totale tra le labels e gli output prodotti dalla rete
+        cross = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=output_logits)
+
+        #Calcolo l'errore relativo ai singoli batch, applicando una maschera che considera gli output prodotti dalla rete
+        #solo negli unrolling corrispondenti a delle parole della recensione e non considerando quelli prodotti in corrispondenza
+        #di padding. La maschera applicata fornisce peso via via crescente mano a mano che si procede verso le ultime parole
+        #della recensione.
+        batch_error = tf.reduce_sum(cross * mask, 1)
+
+        #Faccio la media degli errori dei singoli batch
+        total_error = tf.reduce_mean(batch_error)
+
+        #Ricavo la polarita' che la rete ha indicato all'ultima parola di ogni recensione,
+        prediction = tf.argmax(output_logits[:,max_lenght-1], 1)
+
+        #Ricavo la polarita' indicata dalle label
+        expected = tf.argmax(y_[:,max_lenght-1], 1)
+
+        #Ricavo quante predizioni della polarita' sono state fatte correttamente
+        correct_prediction = tf.equal(prediction, expected)
+
+        #Ricavo cosi' l'accuratezza ottenuta in questo batch
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+        #Set up optimizer with global norm clipping.
+        trainable_variables = tf.trainable_variables()
+        grads, _ = tf.clip_by_global_norm(
+            tf.gradients(total_error, trainable_variables), self.FLAGS.max_grad_norm)
+
+        global_step = tf.get_variable(
+            name="global_step",
+            shape=[],
+            dtype=tf.int64,
+            initializer=tf.random_uniform_initializer(-1, 1),
+            trainable=False,
+            collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
+
+        #Placeholder che conterra' il learning rate
+        learning_rate = tf.placeholder(tf.float32)
+
+        optimizer = tf.train.RMSPropOptimizer(
+            learning_rate, epsilon=self.FLAGS.optimizer_epsilon)
+
+        #Passo di addestramento da eseguire per addestrare la rete
+        train_step = optimizer.apply_gradients(
+            zip(grads, trainable_variables), global_step=global_step)
+
+        #Oggetto per salvare lo stato della rete.
+        saver = tf.train.Saver()
+
+        #Impostazione dei parametri relativi al salvataggio dello stato della rete.
+        if self.FLAGS.checkpoint_interval > 0:
+          hooks = [
+              tf.train.CheckpointSaverHook(
+                  checkpoint_dir=self.FLAGS.checkpoint_dir,
+                  save_steps=self.FLAGS.checkpoint_interval,
+                  saver=saver)
+          ]
+        else:
+          hooks = []
+
+        #Viene scritto un file di log dell'esecuzione corrente.
+        date = time.strftime("%b%d%H:%M:%S")
+        outputFile = open("Experiment"+date+".txt",'w')
+
+        with open("config/configuration.json") as data_file:
+          configuration = json.load(data_file)
+          outputFile.write(json.dumps(configuration))
+
+        config = tf.ConfigProto()
+        config.gpu_options.per_process_gpu_memory_fraction = 0.4
+
+        with tf.train.SingularMonitoredSession(
+            hooks=hooks, checkpoint_dir=self.FLAGS.checkpoint_dir,config=config) as sess:
+          predictions = []
+          for test_iteration in range(0,(self.FLAGS.num_testing_iterations//self.FLAGS.batch_size)):
+              datasetTest = next(self.testing_generator)
+              res_prediction = sess.run(prediction,
+                                      {x: datasetTest[0],
+                                       y_: datasetTest[1],
+                                       mask: datasetTest[2]})
+
+              predictions.extend(res_prediction)
+          print("How many predictions? " + str(len(predictions)))
+          final_predictions = pd.DataFrame(predictions.copy())
+          final_predictions.index += 1
+          final_predictions = final_predictions.reset_index()
+          final_predictions.columns = ['Id', 'Prediction']
+          final_predictions = final_predictions.set_index('Id')
+          final_predictions[final_predictions['Prediction'] == 0] = -1
+          final_predictions.to_csv('./predictions_csv/DNC_prediction.csv')
+          outputFile.close()

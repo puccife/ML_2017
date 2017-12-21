@@ -1,12 +1,11 @@
 {
-  "data_dir":"data/",
   "embedding_dim":200,
-  "model_name":"lstm_256_x2_dropout_0-25_biggest_datasetT&G_200d_adam.tflearn",
-  "model_path":"",
-  "embedding_dir":"glove.twitter.27B.200d.txt",
-  "train_data_file_pos":"",
-  "train_data_file_neg":"",
-  "test_data_file":"",
+  "model_name":"./weights/LSTM_weights/lstm_256_x2_dropout_0-5_biggest_datasetT&G_200d_adam.tflearn",
+  "model_path":"./weights/LSTM_weights/lstm_256_x2_dropout_0-5_biggest_datasetT&G_200d_adam.tflearn",
+  "embedding_dir":"./glove.twitter.27B/glove.twitter.27B.200d.txt",
+  "train_data_file_pos":"./twitter-datasets/train_pos_full.txt",
+  "train_data_file_neg":"./twitter-datasets/train_neg_full.txt",
+  "test_data_file":"./twitter-datasets/test_data.txt",
   "max_sequence_length":30,
   "max_nb_words": 200000,
   "validation_split": 0.2
