@@ -30,7 +30,7 @@ def predict(saver, init, model, config, dmn_trainer):
         session.run(init)
 
         print('==> restoring weights')
-        saver.restore(session, 'weights/DMN_weights/task' + str(model.config.babi_id) + '.weights')
+        saver.restore(session, './DMN_weights/taskDMN1epocha1.weights')
 
         print('==> running DMN')
         predictions = model.run_epoch(session, model.test)
@@ -48,8 +48,8 @@ def create_prediction(name, final_prediction):
         df.columns = ['Id', 'Prediction']
         df = df.set_index('Id')
         df[df['Prediction'] == 0] = -1
-        df.to_csv('.predictions_csv/DMN_prediction.csv')
-        df = pd.read_csv('.predictions_csv/DMN_prediction.csv')
+        df.to_csv('./predictions_csv/DMN_prediction.csv')
+        df = pd.read_csv('./predictions_csv/DMN_prediction.csv')
         df = df.set_index('Id')
         df[df['Prediction'] == 0] = -1
         df.to_csv("./predictions_csv/DMN_prediction.csv")
