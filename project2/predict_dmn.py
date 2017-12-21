@@ -5,7 +5,7 @@ import pandas as pd
 
 import tensorflow as tf
 
-from utils.argument_loader import ArgumentLoader
+from config.argument_loader import ArgumentLoader
 from dmn.dmn_plus import Config, DMN_PLUS
 from model.dmn_trainer import DMNTrainer
 
@@ -30,7 +30,7 @@ def predict(saver, init, model, config, dmn_trainer):
         session.run(init)
 
         print('==> restoring weights')
-        saver.restore(session, 'weights/DMN_weights/task' + str(model.config.babi_id) + '.weights')
+        saver.restore(session, 'DMN_weights/taskDMN1epocha1.weights')
 
         print('==> running DMN')
         predictions = model.run_epoch(session, model.test)
