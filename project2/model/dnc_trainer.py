@@ -26,6 +26,9 @@ class DNCTrainer:
 
 
     def __init_model(self):
+        """
+        Function used to initialize DNC trainer
+        """
         gt = GloveTrainer(vector_size=self.FLAGS.word_dimension, glove_dir=self.FLAGS.glove_dir)
         word_embeddings = gt.generate_word_embeddings()
         self.dm = DatasetManipulator(self.FLAGS.dataset_pos,self.FLAGS.dataset_neg, self.FLAGS.dataset_test)
@@ -38,10 +41,18 @@ class DNCTrainer:
         print("Training on: " + str(len(self.training_set)) + " elements")
 
     def __create_generators(self):
+        """
+        Function used to create the generators for training and testing
+        """
         self.training_generator = self.dm.get_generator(self.training_set, self.FLAGS)
         self.testing_generator = self.dm.get_generator(self.testing_set, self.FLAGS)
 
     def run_model(self, input_sequence):
+        """
+        Function that creates the structure of the DNC and returns the expected output
+        :param input_sequence: the input sequence of the DNC
+        :return: expected output
+        """
         print("Running model")
         access_config = {
           "memory_size": self.FLAGS.memory_size,
@@ -54,13 +65,12 @@ class DNCTrainer:
         }
 
         clip_value = self.FLAGS.clip_value
-        #Creo la cella dnc
-
+        #Creating dnc cell
         dnc_core = dnc.DNC(access_config, controller_config, self.FLAGS.num_classes, clip_value)
         initial_state = dnc_core.initial_state(self.FLAGS.batch_size)
-        #Funzione che ritorna una coppia (output,state), dove output in questo caso sara un tensore
-        #di forma  [batch_size,max_time,cell.output_size] perche il flag time_major e impostato a False
-        #se lo si setta a True invece la forma dell'output diventa [max_time,batch_size,cell.output_size].
+
+        # This function returns a couple (output, state) where output in this case will be a tensor
+        # of shape [batch_size, max_time, cell.output_size] since flag time_major is set to false
         output_sequence, _ = tf.nn.dynamic_rnn(
           cell=dnc_core,
           inputs=input_sequence,
@@ -73,40 +83,37 @@ class DNCTrainer:
     def train_model(self):
         print("Training model")
         max_lenght = self.FLAGS.max_lenght
-          #Placeholder che andra' a contenere il batch di label relativa alle recensioni
+          #Placeholder for the label
         y_= tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght,self.FLAGS.num_classes])
 
-        #Placeholder che andra' a contenere il batch di recensioni opportunamente codificate
+        #Placeholder for the input sequence
         x = tf.placeholder(tf.float32, [self.FLAGS.batch_size, max_lenght, self.FLAGS.word_dimension])
 
-        #Placeholder che andra' a contenere il batch di maschere da applicare per il calcolo della cross-entropy
+        #Placeholder for the mask -> cross-entropy
         mask = tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght])
 
-        #Richiamando il metodo run_model ottengo la sequenza prodotta dalla rete
+        #Getting the expected output from the network
         output_logits = self.run_model(x)
 
-        #Calcolo della cross entropy totale tra le labels e gli output prodotti dalla rete
+        #Function to get the total cross-entropy loss
         cross = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=output_logits)
 
-        #Calcolo l'errore relativo ai singoli batch, applicando una maschera che considera gli output prodotti dalla rete
-        #solo negli unrolling corrispondenti a delle parole della recensione e non considerando quelli prodotti in corrispondenza
-        #di padding. La maschera applicata fornisce peso via via crescente mano a mano che si procede verso le ultime parole
-        #della recensione.
+        # Getting the relative error for each batch, applying mask that applies weights to the position of each word.
         batch_error = tf.reduce_sum(cross * mask, 1)
 
-        #Faccio la media degli errori dei singoli batch
+        #Avg of single batch error
         total_error = tf.reduce_mean(batch_error)
 
-        #Ricavo la polarita' che la rete ha indicato all'ultima parola di ogni recensione,
+        #Getting prediction of the network
         prediction = tf.argmax(output_logits[:,max_lenght-1], 1)
 
-        #Ricavo la polarita' indicata dalle label
+        #Getting expected label
         expected = tf.argmax(y_[:,max_lenght-1], 1)
 
-        #Ricavo quante predizioni della polarita' sono state fatte correttamente
+        #Getting number of correct prediction
         correct_prediction = tf.equal(prediction, expected)
 
-        #Ricavo cosi' l'accuratezza ottenuta in questo batch
+        #Getting accuracy
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
         #Set up optimizer with global norm clipping.
@@ -122,20 +129,20 @@ class DNCTrainer:
             trainable=False,
             collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
 
-        #Placeholder che conterra' il learning rate
+        #Placeholder for learning rate
         learning_rate = tf.placeholder(tf.float32)
 
         optimizer = tf.train.RMSPropOptimizer(
             learning_rate, epsilon=self.FLAGS.optimizer_epsilon)
 
-        #Passo di addestramento da eseguire per addestrare la rete
+        #Training step
         train_step = optimizer.apply_gradients(
             zip(grads, trainable_variables), global_step=global_step)
 
-        #Oggetto per salvare lo stato della rete.
+        #Network saver
         saver = tf.train.Saver()
 
-        #Impostazione dei parametri relativi al salvataggio dello stato della rete.
+        #Parameters to save the network
         if self.FLAGS.checkpoint_interval > 0:
           hooks = [
               tf.train.CheckpointSaverHook(
@@ -146,7 +153,7 @@ class DNCTrainer:
         else:
           hooks = []
 
-        #Viene scritto un file di log dell'esecuzione corrente.
+        #Log file writer
         date = time.strftime("%b%d%H:%M:%S")
         outputFile = open("Experiment"+date+".txt",'w')
 
@@ -159,29 +166,28 @@ class DNCTrainer:
 
         with tf.train.SingularMonitoredSession(
             hooks=hooks, checkpoint_dir=self.FLAGS.checkpoint_dir,config=config) as sess:
-          #Viene inizializzato un generatore attraverso il quale ottenere mano a mano i vari batch di training e testing,
-          #Viene ottenuto un primo batch per compiere il passo di inizializzazione della rete
+
+          # Getting first batch to train the network
           datasetTrain = next(self.training_generator)
 
-          #Variabile per indicare che il passo di inizializzazione e' stato appena compiuto
+          #Variable to set the initializing parameter
           glob = True
-          #Esecuzione del passo di inizializzazione
+          #Initializing
           start_iteration = sess.run(global_step,{x:(datasetTrain[0]),
                                                   y_:(datasetTrain[1]),
                                                   mask:(datasetTrain[2]),
                                                   learning_rate: self.FLAGS.learning_rate})
 
-          #Viene calcolato di quanto debba essere diminuito il learning rate in ogni epoca.
+          #Learning rate decreasing.
           if self.FLAGS.num_epochs > 10:
               delta = (self.FLAGS.learning_rate-self.FLAGS.final_learning_rate)/9
           else:
               delta = (self.FLAGS.learning_rate-self.FLAGS.final_learning_rate)/(self.FLAGS.num_epochs-1)
 
-          #Variabili atte a contenere i migliori risultati ottenuti
+          #Saving best training accuracy
           best_train_accuracy  = 0
 
           for epochs in range(self.FLAGS.num_epochs):
-              #Se il passo di inizializzazione e' stato appena fatto ho gia' il generatore, altrimenti lo devo ri-ottenere
               if not glob:
                   self.__create_generators()
               if self.FLAGS.num_epochs > 1 :
@@ -192,7 +198,7 @@ class DNCTrainer:
               train_accuracy = 0
               newLearningRate = self.FLAGS.learning_rate - delta * (epochs)
 
-              #Dopo 10 epoche il learning rate non viene diminuito piu'
+              #Stop decreasing lr after 10 epochs
               if epochs > 9:
                   newLearningRate = self.FLAGS.final_learning_rate
 
@@ -208,13 +214,13 @@ class DNCTrainer:
                       glob = False
                   else:
                       datasetTrain = next(self.training_generator)
-                  #Viene compiuto un passo di training
+                  #Training
                   _, act_accuracy, entropy = sess.run([train_step, accuracy, total_error],
                                                       {x: (datasetTrain[0]),
                                                        y_: (datasetTrain[1]),
                                                        mask: (datasetTrain[2]),
                                                        learning_rate: newLearningRate})
-                  #Viene controllato che la rete non sia andata in NaN, in caso contrario l'esecuzione viene fermata
+                  #Validity checks
                   val = float(entropy)
                   if math.isnan(val):
                       print('Detected NaN')
@@ -233,7 +239,7 @@ class DNCTrainer:
                   total_entropy += entropy
                   train_accuracy += act_accuracy
 
-                  #Ogni certo intervallo vengono riportate le informazioni relative al training
+                  #Info intervals
                   if (train_iteration + 1) % self.FLAGS.report_interval == 0:
                       date = time.strftime("%H:%M:%S")
                       tf.logging.info("Time: %s ,%d: Avg training accuracy %f.\nAvg Cross entropy: %f\n",
@@ -244,17 +250,16 @@ class DNCTrainer:
                       total_accuracy = 0
                       total_entropy = 0
 
-              #Al termine di ogni epoca viene riportata la media di accuratezza dell'epoca
+              #Info interval
               tf.logging.info("\nEpoch: %d,Iteration: %d, Average Training accuracy: %f\n",
                               epochs, train_iteration+1, train_accuracy / (train_iteration+1))
 
               info3 = "\nEpoch: "+str(epochs)+",Iteration: "+str(train_iteration+1)+", Average Training accuracy: "+str(train_accuracy / (train_iteration+1))+"\n"
               outputFile.write(info3)
-              # tf.logging.info("Memory usage %f Mb",memory_usage()['rss']/1000)
 
               epoch_train_accuracy = train_accuracy / (train_iteration+1)
 
-              #Se il risultato corrente e' migliore del precedente viene salvato
+              #Saving best result
               if epoch_train_accuracy> best_train_accuracy:
                   best_train_accuracy = epoch_train_accuracy
 
@@ -278,43 +283,31 @@ class DNCTrainer:
           outputFile.close()
 
     def test_model(self):
+        """
+        Function to test the model 
+        """
         print("Testing model")
         max_lenght = self.FLAGS.max_lenght
-          #Placeholder che andra' a contenere il batch di label relativa alle recensioni
+
         y_= tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght,self.FLAGS.num_classes])
 
-        #Placeholder che andra' a contenere il batch di recensioni opportunamente codificate
         x = tf.placeholder(tf.float32, [self.FLAGS.batch_size, max_lenght, self.FLAGS.word_dimension])
 
-        #Placeholder che andra' a contenere il batch di maschere da applicare per il calcolo della cross-entropy
         mask = tf.placeholder(tf.float32,shape=[self.FLAGS.batch_size,max_lenght])
 
-        #Richiamando il metodo run_model ottengo la sequenza prodotta dalla rete
         output_logits = self.run_model(x)
 
-        #Calcolo della cross entropy totale tra le labels e gli output prodotti dalla rete
         cross = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=output_logits)
 
-        #Calcolo l'errore relativo ai singoli batch, applicando una maschera che considera gli output prodotti dalla rete
-        #solo negli unrolling corrispondenti a delle parole della recensione e non considerando quelli prodotti in corrispondenza
-        #di padding. La maschera applicata fornisce peso via via crescente mano a mano che si procede verso le ultime parole
-        #della recensione.
         batch_error = tf.reduce_sum(cross * mask, 1)
 
-        #Faccio la media degli errori dei singoli batch
         total_error = tf.reduce_mean(batch_error)
 
-        #Ricavo la polarita' che la rete ha indicato all'ultima parola di ogni recensione,
         prediction = tf.argmax(output_logits[:,max_lenght-1], 1)
 
-        #Ricavo la polarita' indicata dalle label
         expected = tf.argmax(y_[:,max_lenght-1], 1)
 
-        #Ricavo quante predizioni della polarita' sono state fatte correttamente
         correct_prediction = tf.equal(prediction, expected)
-
-        #Ricavo cosi' l'accuratezza ottenuta in questo batch
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
         #Set up optimizer with global norm clipping.
         trainable_variables = tf.trainable_variables()
@@ -329,20 +322,16 @@ class DNCTrainer:
             trainable=False,
             collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
 
-        #Placeholder che conterra' il learning rate
+        #Placeholder for lr
         learning_rate = tf.placeholder(tf.float32)
 
         optimizer = tf.train.RMSPropOptimizer(
             learning_rate, epsilon=self.FLAGS.optimizer_epsilon)
 
-        #Passo di addestramento da eseguire per addestrare la rete
-        train_step = optimizer.apply_gradients(
-            zip(grads, trainable_variables), global_step=global_step)
-
-        #Oggetto per salvare lo stato della rete.
+        #State saver
         saver = tf.train.Saver()
 
-        #Impostazione dei parametri relativi al salvataggio dello stato della rete.
+        #Saver infos
         if self.FLAGS.checkpoint_interval > 0:
           hooks = [
               tf.train.CheckpointSaverHook(
@@ -353,7 +342,7 @@ class DNCTrainer:
         else:
           hooks = []
 
-        #Viene scritto un file di log dell'esecuzione corrente.
+        #Log files.
         date = time.strftime("%b%d%H:%M:%S")
         outputFile = open("Experiment"+date+".txt",'w')
 
@@ -364,6 +353,7 @@ class DNCTrainer:
         config = tf.ConfigProto()
         config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
+        # Predicting
         with tf.train.SingularMonitoredSession(
             hooks=hooks, checkpoint_dir=self.FLAGS.checkpoint_dir,config=config) as sess:
           predictions = []

@@ -9,7 +9,7 @@ FLAGS = al.get_configuration()
 def main(args):
   tf.logging.set_verbosity(3)
   dt = DNCTrainer(FLAGS)
-  dt.train_model()
+  dt.test_model()
 
 if __name__ == "__main__":
   tf.app.run()
