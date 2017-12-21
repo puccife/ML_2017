@@ -30,7 +30,7 @@ def predict(saver, init, model, config, dmn_trainer):
         session.run(init)
 
         print('==> restoring weights')
-        saver.restore(session, './DMN_weights/taskDMN1epocha1.weights')
+        saver.restore(session, './weights/DMN_weights/taskDMN1epocha1.weights')
 
         print('==> running DMN')
         predictions = model.run_epoch(session, model.test)
